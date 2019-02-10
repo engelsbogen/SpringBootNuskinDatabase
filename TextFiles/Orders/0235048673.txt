@@ -1,0 +1,48 @@
+
+
+    Name:rosie gong
+    ID:CA00331358
+
+Order Details
+
+    My Profile
+    Communications
+    Payment Methods
+    Addresses
+    Order History
+    Favorites List
+
+Order Number: 0235048673
+
+    Order Date:
+    1/22/2019
+    Order Channel:
+    Web
+    Order Status:
+    Complete 
+
+SKU 	Description 	Qty 	Unit Price 	PSV 	Total
+Subtotal 	$410.00
+Shipping 	$0.00
+Tax 	$61.50
+Total 	$471.50
+02010617 	ageLOC LumiSpa Debut Kit Normal/Combo CA 	1 	$217.00 	100 	$217.00
+02110310 	Creamy Cleansing Lotion (CA) 	1 	$18.00 	12.35 	$18.00
+02102711 	Creamy Hydrating Masque (CA) 	3 	$20.00 	39.9 	$60.00
+02110312 	pH Balance Toner (CA) 	1 	$14.25 	9.5 	$14.25
+02102700 	Celltrex Ultra Recovery Fluid (CA) 	1 	$37.75 	25.65 	$37.75
+02111259 	Moisture Restore 75ml (CA) 	1 	$32.00 	21.85 	$32.00
+02101192 	Clay Pack II (CA) 	1 	$15.75 	9.98 	$15.75
+02102707 	Exfoliant Scrub II (CA) 	1 	$15.25 	9.98 	$15.25
+Payment Information
+MasterCard - XIAOJUN GONG - ************3261 - AUTHORIZED
+Shipping Address
+
+    rosie gong 693 Golf Club Rd NB, FREDERICTON, E3B 7S5 
+
+Shipping Method
+Shipping Method (Business Days):
+UPS Ground
+
+Back To Order History
+

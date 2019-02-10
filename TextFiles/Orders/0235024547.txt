@@ -1,0 +1,51 @@
+
+
+    Name:andrew camm
+    ID:CA00356068
+
+Order Details
+
+    My Profile
+    Communications
+    Payment Methods
+    Addresses
+    Order History
+    Favorites List
+
+Order Number: 0235024547
+
+    Order Date:
+    1/21/2019
+    Order Channel:
+    Web
+    Order Status:
+    Complete 
+
+SKU 	Description 	Qty 	Unit Price 	PSV 	Total
+Subtotal 	$382.25
+Shipping 	$0.00
+Tax 	$83.30
+Total 	$465.55
+02110809 	Epoch Glacial Marine Mud 200g (CA) 	1 	$28.50 	18 	$28.50
+02111155 	AP24 Whitening Toothpaste 4oz (CA) 	2 	$0.00/16 PTS 	0 	$0.00/16 PTS
+02110826 	Epoch Firewalker Foot Cream 100ml (CA) 	1 	$0.00/9.5 PTS 	0 	$0.00/9.5 PTS
+02010269 	ADR ageLOC Y-Span & R2 (CA) 	1 	$263.00 	184 	$263.00
+02102711 	Creamy Hydrating Masque (CA) 	1 	$0.00/13.3 PTS 	0 	$0.00/13.3 PTS
+02110308 	Enhancer II (CA) 	1 	$0.00/9.5 PTS 	0 	$0.00/9.5 PTS
+02101215 	Polishing Peel (CA) 	1 	$0.00/20 PTS 	0 	$0.00/20 PTS
+02160902 	Contouring Lip Gloss Crystal Clear (CA) 	1 	$19.25 	11.4 	$19.25
+02001587 	Nutricentials Celltrex Ultra Mask (CA) 	1 	$29.50 	21 	$29.50
+02310014 	TCS LumiSpa Single Pak Gentle Blue (CA) 	1 	$42.00 	26 	$42.00
+02010733 	ageLOC LumiSpa ADR Complete Dry (CA) 	1 	$0.00/44 PTS 	0 	$0.00/44 PTS
+Payment Information
+MasterCard - XIAOJUN GONG - ************3261 - AUTHORIZED
+Shipping Address
+
+    andrew camm 693 Golf Club Rd NB, FREDERICTON, E3B 7S5 
+
+Shipping Method
+Shipping Method (Business Days):
+UPS Ground
+
+Back To Order History
+

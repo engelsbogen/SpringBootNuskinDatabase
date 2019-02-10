@@ -1,0 +1,42 @@
+
+
+    Name:rosie gong
+    ID:CA00331358
+
+Order Details
+
+    My Profile
+    Communications
+    Payment Methods
+    Addresses
+    Order History
+    Favorites List
+
+Order Number: 0235024001
+
+    Order Date:
+    1/21/2019
+    Order Channel:
+    Web
+    Order Status:
+    Complete 
+
+SKU 	Description 	Qty 	Unit Price 	PSV 	Total
+Subtotal 	$248.00
+Shipping 	$0.00
+Tax 	$32.25
+Total 	$280.25
+02102704 	Tru Face Line Corrector (CA) 	2 	$47.25 	64.6 	$94.50
+02003901 	ageLOC R2 (CA) 	1 	$153.50 	105 	$153.50
+Payment Information
+MasterCard - XIAOJUN GONG - ************3261 - AUTHORIZED
+Shipping Address
+
+    Lin Han 567 Ambleside Dr ON, LONDON, N6G 4Y8 
+
+Shipping Method
+Shipping Method (Business Days):
+UPS Ground
+
+Back To Order History
+

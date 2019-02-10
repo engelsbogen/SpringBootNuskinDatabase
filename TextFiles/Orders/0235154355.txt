@@ -1,0 +1,44 @@
+
+
+    Name:rosie gong
+    ID:CA00331358
+
+Order Details
+
+    My Profile
+    Communications
+    Payment Methods
+    Addresses
+    Order History
+    Favorites List
+
+Order Number: 0235154355
+
+    Order Date:
+    1/28/2019
+    Order Channel:
+    Web
+    Order Status:
+    Complete 
+
+SKU 	Description 	Qty 	Unit Price 	PSV 	Total
+Subtotal 	$112.25
+Shipping 	$0.00
+Tax 	$16.84
+Total 	$129.09
+02000853 	POWERlips Fluid Ambition (CA) 	1 	$20.00 	13.25 	$20.00
+02000854 	POWERlips Fluid Noble (CA) 	1 	$20.00 	13.25 	$20.00
+02001575 	POWERlips Fluid Breadwinner (CA) 	1 	$20.00 	13.25 	$20.00
+02003902 	ageLOC Body Shaping Gel (CA) 	1 	$52.25 	36.75 	$52.25
+Payment Information
+MasterCard - XIAOJUN GONG - ************3261 - AUTHORIZED
+Shipping Address
+
+    rosie gong 693 Golf Club Rd NB, FREDERICTON, E3B 7S5 
+
+Shipping Method
+Shipping Method (Business Days):
+UPS Ground
+
+Back To Order History
+

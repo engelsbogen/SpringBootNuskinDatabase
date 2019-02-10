@@ -1,0 +1,48 @@
+
+
+    Name:rosie gong
+    ID:CA00331358
+
+Order Details
+
+    My Profile
+    Communications
+    Payment Methods
+    Addresses
+    Order History
+    Favorites List
+
+Order Number: 0235024261
+
+    Order Date:
+    1/21/2019
+    Order Channel:
+    Web
+    Order Status:
+    Complete 
+
+SKU 	Description 	Qty 	Unit Price 	PSV 	Total
+Subtotal 	$358.25
+Shipping 	$0.00
+Tax 	$81.25
+Total 	$439.50
+02000961 	Galvanic Spa Loyalty Refill ADR (CA) 	1 	$89.00 	60 	$89.00
+02111155 	AP24 Whitening Toothpaste 4oz (CA) 	4 	$0.00/32 PTS 	0 	$0.00/32 PTS
+02110826 	Epoch Firewalker Foot Cream 100ml (CA) 	2 	$0.00/19 PTS 	0 	$0.00/19 PTS
+02110257 	NaPCA Moisturizer (CA) 	1 	$0.00/18.05 PTS 	0 	$0.00/18.05 PTS
+02102704 	Tru Face Line Corrector (CA) 	1 	$0.00/32.3 PTS 	0 	$0.00/32.3 PTS
+02003902 	ageLOC Body Shaping Gel (CA) 	1 	$52.25 	36.75 	$52.25
+02110329 	Hand Lotion II (CA) 	2 	$0.00/15.2 PTS 	0 	$0.00/15.2 PTS
+02010617 	ageLOC LumiSpa Debut Kit Normal/Combo CA 	1 	$217.00 	100 	$217.00
+Payment Information
+MasterCard - XIAOJUN GONG - ************3261 - AUTHORIZED
+Shipping Address
+
+    rosemary gong 693 Golf Club Rd NB, FREDERICTON, E3B 7S5 
+
+Shipping Method
+Shipping Method (Business Days):
+UPS Ground
+
+Back To Order History
+

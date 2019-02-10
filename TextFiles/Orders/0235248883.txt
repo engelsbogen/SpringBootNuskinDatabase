@@ -1,0 +1,47 @@
+
+
+    Name:rosie gong
+    ID:CA00331358
+
+Order Details
+
+    My Profile
+    Communications
+    Payment Methods
+    Addresses
+    Order History
+    Favorites List
+
+Order Number: 0235248883
+
+    Order Date:
+    2/1/2019
+    Order Channel:
+    Web
+    Order Status:
+    Complete 
+
+SKU 	Description 	Qty 	Unit Price 	PSV 	Total
+Subtotal 	$225.50
+Shipping 	$0.00
+Tax 	$41.62
+Total 	$267.12
+02001492 	ageLOC LumiSpa TC Normal/Combo (CA) 	1 	$42.00 	26 	$42.00
+02102700 	Celltrex Ultra Recovery Fluid (CA) 	1 	$37.75 	25.65 	$37.75
+02110312 	pH Balance Toner (CA) 	1 	$0.00/9.5 PTS 	0 	$0.00/9.5 PTS
+02102700 	Celltrex Ultra Recovery Fluid (CA) 	1 	$0.00/25.65 PTS 	0 	$0.00/25.65 PTS
+02101241 	Tru Face Ideal Eyes (CA) 	1 	$44.75 	30.4 	$44.75
+02003519 	ReishiMax (CA) 	1 	$101.00 	68.4 	$101.00
+02003648 	g3 Juice Bottle 2pk (CA) 	1 	$0.00/57.95 PTS 	0 	$0.00/57.95 PTS
+Payment Information
+MasterCard - XIAOJUN GONG - ************3261 - AUTHORIZED
+Shipping Address
+
+    rosie gong 693 Golf Club Rd NB, FREDERICTON, E3B 7S5 
+
+Shipping Method
+Shipping Method (Business Days):
+UPS Ground
+
+Back To Order History
+

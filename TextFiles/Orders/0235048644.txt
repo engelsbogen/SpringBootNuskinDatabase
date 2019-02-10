@@ -1,0 +1,41 @@
+
+
+    Name:andrew camm
+    ID:CA00356068
+
+Order Details
+
+    My Profile
+    Communications
+    Payment Methods
+    Addresses
+    Order History
+    Favorites List
+
+Order Number: 0235048644
+
+    Order Date:
+    1/22/2019
+    Order Channel:
+    Web
+    Order Status:
+    Complete 
+
+SKU 	Description 	Qty 	Unit Price 	PSV 	Total
+Subtotal 	$598.00
+Shipping 	$0.00
+Tax 	$89.70
+Total 	$687.70
+02001299 	ageLOC TFEU Buy 3 Get 1 Free (CA) 	1 	$598.00 	409 	$598.00
+Payment Information
+MasterCard - XIAOJUN GONG - ************3261 - AUTHORIZED
+Shipping Address
+
+    andrew camm 693 Golf Club Rd NB, FREDERICTON, E3B 7S5 
+
+Shipping Method
+Shipping Method (Business Days):
+UPS Ground
+
+Back To Order History
+
