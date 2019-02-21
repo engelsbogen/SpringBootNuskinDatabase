@@ -11,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+
 @Entity
 @Table(name="orders")
 class Order {
@@ -34,6 +36,21 @@ class Order {
 	@Transient
 	ArrayList<Product> products = new ArrayList<Product>();
 
+	@JsonGetter(value="hasUnsoldItems") 
+	public boolean hasUnsoldItems() {
+		
+		for (Product product: products) {
+			
+			if (product.getEndUse() == Product.EndUse.INSTOCK) {
+				return true;
+			}
+			
+		}
+		
+		// No unsold items found
+		return false;
+		
+	}
 	
 	// Provide getters and setters for JSON conversion
 	public String getOrderNumber() {
