@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head> 
+	<title>Nuskin Order - Items</title>
+	<link rel="shortcut icon" href="/favicon.ico"/>
+	<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no"/>
+	<meta name="theme-color" content="#000000"/><link rel="manifest" href="/manifest.json"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+	<noscript>You need to enable JavaScript to run this app.</noscript>
+	<div id="root"></div>
+	<script src="/js/products.js"></script>
+	<script th:inline="javascript">
+	    window.onload=showProducts(/*[[${orderNumber}]]*/);
+	</script>
+</body>
+</html>
+    
+</body>
+</html>
