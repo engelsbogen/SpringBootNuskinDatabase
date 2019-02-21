@@ -34,16 +34,31 @@ public class Product  {
 	@Column
 	BigDecimal sellingPrice = new BigDecimal(0);
 	@Column 
-	int receiptNumber;
+	String receiptNumber;
 	@Column
 	String customerName = "";
-	
+	@Column
+	EndUse endUse = EndUse.INSTOCK;
 	@OneToOne // The primary key of productType (the SKU) will be added to this table
 	ProductType productType = new ProductType();
-
 	@OneToOne
 	Order order;
 
+
+	static final String TAB = "\t";
+	
+	enum EndUse {
+		INSTOCK, SOLD, PERSONAL, DEMO, SAMPLE 
+	}
+	
+	public EndUse getEndUse() {
+		return endUse;
+	}
+
+	public void setEndUse(EndUse endUse) {
+		this.endUse = endUse;
+	}
+	
 	@JsonGetter(value="orderNumber") 
 	public String getOrderNumber() {
 		return order.getOrderNumber();
@@ -53,7 +68,6 @@ public class Product  {
 		return tax;
 	}
 
-	final String TAB = "\t";
 	
 	Product() {
 		description = "NONE";
@@ -99,11 +113,11 @@ public class Product  {
 		this.sellingPrice = sellingPrice;
 	}
 
-	public int getReceiptNumber() {
+	public String getReceiptNumber() {
 		return receiptNumber;
 	}
 
-	public void setReceiptNumber(int receiptNumber) {
+	public void setReceiptNumber(String receiptNumber) {
 		this.receiptNumber = receiptNumber;
 	}
 
@@ -188,7 +202,6 @@ public class Product  {
 	    tax = rhs.tax;
 	    shipping = rhs.shipping;
 		productType = rhs.productType;
-		
 	}
 	
 	void show() {
