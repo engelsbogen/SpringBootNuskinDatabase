@@ -44,7 +44,6 @@ class Order {
 			if (product.getEndUse() == Product.EndUse.INSTOCK) {
 				return true;
 			}
-			
 		}
 		
 		// No unsold items found
@@ -190,14 +189,58 @@ class Order {
 		}
 	}
 	
+	
+	void getProductsFromDatabase() {
+		
+		ProductDatabase db = ProductDatabase.getDB();
+		products = db.getOrderItems(this.orderNumber); 
+		// Make sure they are sorted by item number 
+	}
+	
+	
 	void addToDatabase() {
 		ProductDatabase db = ProductDatabase.getDB();
 		
-		db.addOrder(this);
 		
-		// Add each product to the database
-		for (Product product : products) {
-			db.addProduct(product);
+		// Is this order already in the database?
+		
+		Order existing = db.getOrder(this.orderNumber);
+		if (existing == null) {
+			db.addOrder(this);
+		
+			// Add each product to the database
+			for (Product product : products) {
+				db.addProduct(product);
+			}
+		}
+		else {
+			
+			System.out.println("Order already in the database");
+			
+			if (!this.date.equals(existing.date)) {
+				System.err.println("Dates don't match");
+			}
+			if (!this.account.equals(existing.account)) {
+				System.err.println("Accounts don't match");
+			}
+			if (!this.shippingAddress.equals(existing.shippingAddress)) {
+				System.err.println("Shipping addresses don't match");
+			}
+			if (this.subtotal.compareTo(existing.subtotal) != 0) {
+				System.err.println("Subtotals don't match");
+			}
+			if (this.tax.compareTo(existing.tax) != 0) {
+				System.err.println("Subtotals don't match");
+			}
+			if (existing.products.size() != this.products.size()) {
+				System.err.println("Order has different number of items");
+			} 
+			else {
+				for (int i=0; i< products.size(); i++) {
+					existing.products.get(i).compare(this.products.get(i));
+				}
+			}
+		
 		}
 	}
 	
