@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 
 @SpringBootApplication
+@EnableScheduling           // Run database backup every day
 public class Application implements CommandLineRunner {
     
 	@Autowired
@@ -23,6 +25,13 @@ public class Application implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 		
 		boolean populateDatabase = false;
+		boolean backupDatabase = true;
+		
+		if (backupDatabase) {
+			// Might make sense to backup every time we start as well as the scheduled backup every day at midnight
+			db.backup();
+		}
+		
 		
 		if (populateDatabase) {
 		
