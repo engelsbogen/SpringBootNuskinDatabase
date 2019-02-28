@@ -22,7 +22,7 @@ public class Product  {
 	@GeneratedValue
 	Long id;
 	@Column
-	String description;
+	String description = "";
 	@Column
 	BigDecimal costPrice = new BigDecimal(0);
 	@Column
@@ -34,7 +34,7 @@ public class Product  {
 	@Column
 	BigDecimal sellingPrice = new BigDecimal(0);
 	@Column 
-	String receiptNumber;
+	String receiptNumber = "";
 	@Column
 	String customerName = "";
 	@Column
@@ -62,6 +62,10 @@ public class Product  {
 	@JsonGetter(value="orderNumber") 
 	public String getOrderNumber() {
 		return order.getOrderNumber();
+	}
+	@JsonGetter(value="sku") 
+	public String getSku() {
+		return productType.getSku();
 	}
 	
 	public BigDecimal getTax() {
@@ -114,6 +118,7 @@ public class Product  {
 	}
 
 	public String getReceiptNumber() {
+		if (receiptNumber == null) receiptNumber = "";  // Replace with empty string to help out with the front end
 		return receiptNumber;
 	}
 
@@ -158,39 +163,70 @@ public class Product  {
 	public void setShipping(BigDecimal shipping) {
 		this.shipping = shipping;
 	}
+	
+
+	// Check get the same result reading a PDF and a text file
+	void compare(Product other) {
+		
+		// Seems I didn't trim trailing spaces from the text file parsing 
+		// (code fixed now but database still has it in)
+		this.description = this.description.trim();
+		
+		if (!this.description.equals(other.description) ) {
+			System.err.println("Shipping does not match");
+		}
+		if (this.costPrice.compareTo(other.costPrice) != 0) {
+			System.err.println("Product cost price does not match");
+		}
+		if (this.shipping.compareTo(other.shipping) != 0) {
+			System.err.println("Product shipping does not match");
+		}
+		if (this.costPoints.compareTo(other.costPoints) != 0) {
+			System.err.println("Product cost points does not match");
+		}
+		if (this.tax.compareTo(other.tax) != 0) {
+			System.err.println("Product tax does not match");
+		}
+		
+	}
+	
 
 	Product(String SKU, String description, BigDecimal costPrice, BigDecimal costPoints, BigDecimal psv) {
 		
-		// Find productType in the database by SKU 
-		productType = ProductDatabase.getDB().findProductType(SKU);
-
 		this.costPrice = costPrice;
 		this.costPoints = costPoints;
-		
-		// Check description
 		this.description = description;
-		if (!description.equals(productType.description)) {
-			System.err.println("Order description not the same as the product description");
-		}
 		
-		// Check cost price matches either wholesale or retail
-		if (costPrice.compareTo(BigDecimal.ZERO) == 0) {
+		// Find productType in the database by SKU 
+		ProductDatabase db = ProductDatabase.getDB();
+		
+		// TODO if running outside of Spring the database connection might not be made
+		if (db != null) {
+			productType = db.findProductType(SKU);
+	
+			// Check description
+			if (!description.equals(productType.description)) {
+				System.err.println("Order description not the same as the product description");
+			}
 			
-			// Check that the points cost is the same as the ProductType PSV
-			if (costPoints.compareTo(productType.getPsv()) != 0) {
-				System.err.println("Product cost in points " + costPoints + " is not the same as the product type PSV " + productType.getPsv());
-			}
-		}
-		else {
-			if (   (costPrice.compareTo(productType.getRetailPrice()) != 0)
-		    	&& (costPrice.compareTo(productType.getWholesalePrice()) != 0)) {
-
-				System.err.println("Product cost " + costPrice + " is not the same as the product type retail price "
-          						+ productType.getRetailPrice() + " or wholesale price " + productType.getWholesalePrice());
+			// Check cost price matches either wholesale or retail
+			if (costPrice.compareTo(BigDecimal.ZERO) == 0) {
 				
+				// Check that the points cost is the same as the ProductType PSV
+				if (costPoints.compareTo(productType.getPsv()) != 0) {
+					System.err.println("Product cost in points " + costPoints + " is not the same as the product type PSV " + productType.getPsv());
+				}
+			}
+			else {
+				if (   (costPrice.compareTo(productType.getRetailPrice()) != 0)
+			    	&& (costPrice.compareTo(productType.getWholesalePrice()) != 0)) {
+	
+					System.err.println("Product cost " + costPrice + " is not the same as the product type retail price "
+	          						+ productType.getRetailPrice() + " or wholesale price " + productType.getWholesalePrice());
+					
+				}
 			}
 		}
-		
 	}
 
 
