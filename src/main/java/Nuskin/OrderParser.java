@@ -40,22 +40,25 @@ public class OrderParser {
 	}
 	
 	
+	boolean startsWithAnSKU(String line) {
+		// If line starts with an 8 digit SKU then its a product 
+   	 	Pattern pattern= Pattern.compile("^[0-9]{8}+");
+   	 	Matcher m = pattern.matcher(line);
+   	 	return m.lookingAt();
+	}
+	
     ProductAndQuantity parseProduct(String line) {
     	
     	ProductAndQuantity p =  new ProductAndQuantity();
-
-    	
-    	// If line starts with an 8 digit SKU then its a product 
-    	 Pattern pattern= Pattern.compile("^[0-9]{8}+");
-    	 Matcher m = pattern.matcher(line);
-    	 if (m.lookingAt()) {
+   	
+    	if (startsWithAnSKU(line)) {
     		 
     		 // Split line on tabs
     		 
     		 String[] parts = line.split("\t");
     		 
     		 String SKU = parts[0];
-    		 String description = parts[1];
+    		 String description = parts[1].trim();
     		 int quantity = Integer.parseInt(parts[2].trim());
     		 
     		 String unitPriceOrPoints = parts[3];
@@ -86,14 +89,9 @@ public class OrderParser {
 	
 	public void parse(String filename)
 	{
-		// Parse file or parse clipboard.
-		
-	    BufferedReader reader;
 	    Order order = new Order();
 	    
-        try {
-	    	
-	    	reader = new BufferedReader(new FileReader(filename));
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
 	    	
 	    	String line = reader.readLine();
 	    	
@@ -169,11 +167,6 @@ public class OrderParser {
 		
 	}
 	
-	
-	public String toString() {
-		return "Order{x:25}";
-		
-	}
 	
 	public void parseAll() {
 		
