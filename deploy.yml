@@ -1,0 +1,44 @@
+# connector deployment
+
+- name: deploys the application
+  hosts: Q190
+  remote_user: adc
+  vars:
+    timestamp: ""
+    version: 0.1.0
+    # Override on command line with ansible-playbook deploy.yml --extra-vars stopOnly=true
+    stopOnly: false
+    destRoot: /home/adc/nuskin-order-manager
+
+  tasks:
+    - name: stop running app
+      shell: "start-stop-daemon --stop --pidfile {{destRoot}}/nuskin-order-manager.pid"
+      ignore_errors: true
+
+    - name: copy the jar file over
+      when: not stopOnly
+      copy: src=target/nuskin-order-manager-{{version}}.jar dest={{destRoot}}/nuskin-order-manager-{{version}}.jar mode='u+rwx'
+
+    - name: copy front end code
+      when: not stopOnly
+      copy: src=../react-nuskin-database/build dest={{destRoot}} 
+       
+    - name: copy front end code (2)
+      when: not stopOnly
+      copy: src=../react-nuskin-database/public dest={{destRoot}} 
+
+    - name: unlink the current app
+      when: not stopOnly
+      file: path=/home/adc/nuskin-order-manager.jar state=absent
+
+    - name: link to the newly deployed app
+      when: not stopOnly
+      file: path={{destRoot}}/nuskin-order-manager.jar src={{destRoot}}/nuskin-order-manager-{{version}}.jar state=link
+
+    # For some reason that I haven't yet established, on the Q190 I cannot run the jar file direct, but it works with java -jar <jarfile>
+    - name: start running app
+      when: not stopOnly
+      shell: "start-stop-daemon --chdir {{destRoot}} --start --background --quiet -m --pidfile {{destRoot}}/nuskin-order-manager.pid --exec /usr/bin/java -- -jar {{destRoot}}/nuskin-order-manager.jar" 
+
+
+
