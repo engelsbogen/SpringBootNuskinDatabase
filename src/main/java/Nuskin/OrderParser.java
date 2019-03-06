@@ -58,6 +58,11 @@ public class OrderParser {
     		 String[] parts = line.split("\t");
     		 
     		 String SKU = parts[0];
+    		 
+    		 if (parts.length < 2) {
+    			 return p;
+    		 }
+    		 
     		 String description = parts[1].trim();
     		 int quantity = Integer.parseInt(parts[2].trim());
     		 

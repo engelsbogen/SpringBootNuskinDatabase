@@ -109,6 +109,19 @@ class Order {
 	}
 
 	
+	public boolean hasUnknownProductTypes() {
+		
+		for (Product product: products) {
+			
+			if (product.getProductType() == null) {
+				return true;
+			}
+			
+		}
+		return false;
+	}
+	
+	
 	BigDecimal getTotal() {
 		BigDecimal total = subtotal;
 		total = total.add(shipping);

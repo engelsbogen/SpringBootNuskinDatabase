@@ -204,26 +204,38 @@ public class Product  {
 		if (db != null) {
 			productType = db.findProductType(SKU);
 	
-			// Check description
-			if (!description.equals(productType.description)) {
-				System.err.println("Order description not the same as the product description");
-			}
-			
-			// Check cost price matches either wholesale or retail
-			if (costPrice.compareTo(BigDecimal.ZERO) == 0) {
+			if (productType == null) {
 				
-				// Check that the points cost is the same as the ProductType PSV
-				if (costPoints.compareTo(productType.getPsv()) != 0) {
-					System.err.println("Product cost in points " + costPoints + " is not the same as the product type PSV " + productType.getPsv());
-				}
+				// Its a new product. 
+				// Don't know if this is retail or wholesale price. Anyway need to know both to calculate the tax 
+				//BigDecimal retailPrice = costPrice;
+				//BigDecimal wholesalePrice = costPrice;
+				//BigDecimal csv = new BigDecimal("0.00");
+				//productType = new ProductType(SKU, description, retailPrice, wholesalePrice, psv, csv);
+				
 			}
 			else {
-				if (   (costPrice.compareTo(productType.getRetailPrice()) != 0)
-			    	&& (costPrice.compareTo(productType.getWholesalePrice()) != 0)) {
-	
-					System.err.println("Product cost " + costPrice + " is not the same as the product type retail price "
-	          						+ productType.getRetailPrice() + " or wholesale price " + productType.getWholesalePrice());
+				// Check description
+				if (!description.equals(productType.description)) {
+					System.err.println("Order description not the same as the product description");
+				}
+				
+				// Check cost price matches either wholesale or retail
+				if (costPrice.compareTo(BigDecimal.ZERO) == 0) {
 					
+					// Check that the points cost is the same as the ProductType PSV
+					if (costPoints.compareTo(productType.getPsv()) != 0) {
+						System.err.println("Product cost in points " + costPoints + " is not the same as the product type PSV " + productType.getPsv());
+					}
+				}
+				else {
+					if (   (costPrice.compareTo(productType.getRetailPrice()) != 0)
+				    	&& (costPrice.compareTo(productType.getWholesalePrice()) != 0)) {
+		
+						System.err.println("Product cost " + costPrice + " is not the same as the product type retail price "
+		          						+ productType.getRetailPrice() + " or wholesale price " + productType.getWholesalePrice());
+						
+					}
 				}
 			}
 		}
