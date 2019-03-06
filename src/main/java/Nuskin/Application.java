@@ -49,7 +49,11 @@ public class Application implements CommandLineRunner {
 	        products.add(special);
 	        special = new ProductType("02001299", "ageLOC® Tru Face Essence Ultra Buy 3 Get 1 Free", new BigDecimal("712.00"), new BigDecimal("598.00"), new BigDecimal("409.0"), new BigDecimal("0")) ;
 	        products.add(special);
-	
+
+	        special = new ProductType("02010774", "ageLOC LumiSpa Accent Preview Kit", new BigDecimal("245.00"), new BigDecimal("196.00"), new BigDecimal("134.0"), new BigDecimal("0")) ;
+	        products.add(special);
+
+	        
 			WebpageParser webParser = new WebpageParser();
 			webParser.parse(FileRoot.getRoot() + "PriceList/GalvanicSpa.txt");
 			webParser.parse(FileRoot.getRoot() + "PriceList/GalvanicSpa_retail.txt");
@@ -59,6 +63,10 @@ public class Application implements CommandLineRunner {
 			webParser.parse(FileRoot.getRoot() + "PriceList/Pharmanex_ADR_retail.txt");
 			webParser.parse(FileRoot.getRoot() + "PriceList/LumiSpa.txt");
 			webParser.parse(FileRoot.getRoot() + "PriceList/LumiSpa_retail.txt");
+			
+			webParser.parse(FileRoot.getRoot() + "PriceList/LumiSpa2.txt");
+			webParser.parse(FileRoot.getRoot() + "PriceList/LumiSpa2_retail.txt");
+
 			
 	        ArrayList<ProductType>	webpageProducts = webParser.getProducts();
 	        ArrayList<ProductType> uniqueProducts = new ArrayList<ProductType>();
@@ -91,8 +99,8 @@ public class Application implements CommandLineRunner {
 				db.addProductType(productType);
 			}
 	
-			OrderParser orderParser = new OrderParser();
-			orderParser.parseAll();
+			//OrderParser orderParser = new OrderParser();
+			//orderParser.parseAll();
 		
 		}
 	}
