@@ -1,19 +1,29 @@
 package Nuskin;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 @Component
 public class ProductDatabase {
@@ -38,7 +48,18 @@ public class ProductDatabase {
 	}
 	
 	void addProductType(ProductType productType) {
-		productTypeRepository.save(productType);
+		
+		ProductType existing = findProductType(productType.getSku());
+		
+		if (existing == null) {
+			productTypeRepository.save(productType);
+		}
+		else {
+			// TODO may try to merge or update
+			
+		}
+		
+		
 	}
 	
 	void addProduct(Product product) {
@@ -66,9 +87,12 @@ public class ProductDatabase {
 		
 		if (!productType.isPresent()) {
 			System.err.println("Product " + SKU + " not found in database");
+			return null;
+		}
+		else {
+			return productType.get();
 		}
 		
-		return productType.get();
 	}
 	
 	ArrayList<Product> getOrderItems(String orderNumber) { 
@@ -83,10 +107,77 @@ public class ProductDatabase {
 		String database="Nuskin";
 		String backupPath = FileRoot.getRoot() + "Backups";
 		
-		return doBackup(user,password,database,backupPath);
-	}
+		String secondaryBackupPath = FileRoot.getSecondaryPath() + "/Backups";
 		
-	private boolean doBackup(String user, String password, String database, String backupPath) {
+		
+		return doBackup(user,password,database,backupPath, secondaryBackupPath);
+	}
+	
+    
+    private String getAccessToken() {
+    	
+    	String appID="4c2154bd-f9a3-40e7-a0bc-2f6426e43c14";
+    	RestTemplate rt = new RestTemplate();
+    	
+    	String accessToken = null;
+    	
+    	HttpHeaders headers = new HttpHeaders();
+	   	headers.add("Content-Type", "application/x-www-form-urlencoded");
+    	headers.add("Accept","application/json");
+    	
+    	String requestBody="client_id=" + appID;
+    	
+    	HttpEntity<String> entity = new HttpEntity<String>(requestBody, headers); 
+    	String url = "https://login.microsoftonline.com/token";
+    	
+    	rt.put(url, entity);
+    	
+    	return "XYZ";
+    	
+    }
+    
+    
+    public void uploadToOneDrive() {
+    	
+    	// App ID/Client ID:  4c2154bd-f9a3-40e7-a0bc-2f6426e43c14
+    	
+    	//PUT /me/drive/root:/FolderA/FileB.txt:/content
+    	//Content-Type: text/plain
+    	//The contents of the file goes here.
+    	
+    	String accessToken = getAccessToken();
+    	
+    	String filename = "backup-Nuskin-28-02-2019.sql";
+    	
+    	String requestBody = null;  // The text from the .SQL file?
+    	
+    	try {
+			byte[] b = Files.readAllBytes(Paths.get(FileRoot.getRoot() + "/Backups/" + filename));
+			requestBody=new String(b);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	
+    	RestTemplate rt = new RestTemplate();
+    	
+ 	
+    	HttpHeaders headers = new HttpHeaders();
+    	headers.add("Authorization", "Bearer " + accessToken);
+	   	headers.add("Content-Type", "text/plain");
+    	headers.add("Accept","application/json");
+    	
+   	
+    	HttpEntity<String> entity = new HttpEntity<String>(requestBody, headers); 
+    	String url = "https://graph.microsoft.com/v1.0/me/drive/root:/Dokumente/" + filename + ":/content";
+    	
+    	rt.put(url, entity);
+    	
+    }
+    
+    
+	private boolean doBackup(String user, String password, String database, String backupPath, String secondaryBackupPath) {
 		
         boolean status = false;
         
@@ -110,6 +201,14 @@ public class ProductDatabase {
             if (processStatus == 0) {
                 status = true;
                 log.info("Backup created successfully for " + database );
+                
+                // Copy backup file to external locations.
+                // (1) USB disk
+                Files.copy(Paths.get(backupPath+"/"+backupFilename), Paths.get(secondaryBackupPath + "/" + backupFilename));
+
+                // (2) The cloud
+                GoogleDrive.upload(backupFilename);
+                                
             } else {
                 status = false;
                 log.info("Could not create the backup for " + database );
