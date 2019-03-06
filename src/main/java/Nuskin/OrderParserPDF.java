@@ -147,7 +147,7 @@ public class OrderParserPDF extends OrderParser {
 	}
 	
 	
-	public void parse(InputStream stream) {
+	public Order parse(InputStream stream) {
 
         String text = readPdfText(stream);
         
@@ -264,10 +264,11 @@ public class OrderParserPDF extends OrderParser {
 	    catch (IOException e) {
 	    	e.printStackTrace();
 	    }
-		
+
         // Add this order to the database
 	    order.addToDatabase();
 
+	    return order;
 
 	}
 

@@ -2,6 +2,7 @@ package Nuskin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -19,20 +20,32 @@ public class OrderUploadController {
     @PostMapping("/orderfileupload")
     public ResponseEntity<?> orderFileUpload(@RequestParam("file") MultipartFile file) {
     	
+    	
+    	//ArrayList<Product> unknownProductTypes = new ArrayList<Product>();
+    	
     	System.out.println("Uploading file " + file.getOriginalFilename());
 
     	// Parse PDF
     	if (file.getContentType().equals("application/pdf")) {
     		
     		try {
-				new OrderParserPDF().parse(file.getInputStream());
+				Order order = new OrderParserPDF().parse(file.getInputStream());
+	
+				
+				File dest = new File(FileRoot.getRoot() + "/Orders" + order.getOrderNumber() + ".pdf");
+				
+				file.transferTo(dest);
+				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
     		
     	}
+
     	
+    	//https://www.nuskin.com/content/nuskin/en_CA/cpm/order-details.html
+    		
 	    //} catch (IOException ioe) {
 	    //    //if something went wrong, we need to inform client about it
 	    //    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
