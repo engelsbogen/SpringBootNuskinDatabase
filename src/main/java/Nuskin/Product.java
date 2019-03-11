@@ -1,16 +1,14 @@
 package Nuskin;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
 
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -44,6 +42,8 @@ public class Product  {
 	@OneToOne
 	Order order;
 
+	@Transient
+	String sku = null;
 
 	static final String TAB = "\t";
 	
@@ -65,13 +65,12 @@ public class Product  {
 	}
 	@JsonGetter(value="sku") 
 	public String getSku() {
-		return productType.getSku();
+		return (productType == null ? this.sku : productType.getSku());
 	}
 	
 	public BigDecimal getTax() {
 		return tax;
 	}
-
 	
 	Product() {
 		description = "NONE";
@@ -196,10 +195,11 @@ public class Product  {
 		this.costPrice = costPrice;
 		this.costPoints = costPoints;
 		this.description = description;
+		this.sku = SKU;
 		
 		// Find productType in the database by SKU 
 		ProductDatabase db = ProductDatabase.getDB();
-		
+
 		// TODO if running outside of Spring the database connection might not be made
 		if (db != null) {
 			productType = db.findProductType(SKU);
@@ -250,6 +250,7 @@ public class Product  {
 	    tax = rhs.tax;
 	    shipping = rhs.shipping;
 		productType = rhs.productType;
+		sku = rhs.sku;
 	}
 	
 	void show() {

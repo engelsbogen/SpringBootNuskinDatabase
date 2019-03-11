@@ -1,15 +1,8 @@
 package Nuskin;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,11 +12,8 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 @Component
 public class ProductDatabase {
@@ -96,7 +86,16 @@ public class ProductDatabase {
 	}
 	
 	ArrayList<Product> getOrderItems(String orderNumber) { 
-		return productRepository.findAllByOrderOrderNumber(orderNumber);
+		
+		ArrayList<Product> items = new ArrayList<Product>();
+		try {
+			items = productRepository.findAllByOrderOrderNumber(orderNumber);
+		}
+		catch(javax.persistence.EntityNotFoundException e) {
+			System.out.println(e.toString());
+		}
+		
+		return items;
 	}
 	
     @Scheduled(cron = "0 0 0 * * *")  // Backup at midnight every day
@@ -114,6 +113,8 @@ public class ProductDatabase {
 	}
 	
     
+    /* This was work in progress to talk to Microsoft onedrive 
+     * TDB
     private String getAccessToken() {
     	
     	String appID="4c2154bd-f9a3-40e7-a0bc-2f6426e43c14";
@@ -175,7 +176,7 @@ public class ProductDatabase {
     	rt.put(url, entity);
     	
     }
-    
+    */
     
 	private boolean doBackup(String user, String password, String database, String backupPath, String secondaryBackupPath) {
 		
