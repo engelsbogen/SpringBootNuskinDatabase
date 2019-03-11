@@ -22,6 +22,8 @@ public class ProductType {
 	BigDecimal wholesalePrice = new BigDecimal(0);
 	@Column
     BigDecimal psv = new BigDecimal(0);
+	@Column
+    BigDecimal csv = new BigDecimal(0);
 	
 	public String getSku() {
 		return sku;
@@ -63,8 +65,6 @@ public class ProductType {
 	}
 
 
-	@Column
-    BigDecimal csv = new BigDecimal(0);
 	
 	
 	ProductType() {

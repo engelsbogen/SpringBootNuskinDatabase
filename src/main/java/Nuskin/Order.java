@@ -1,7 +1,5 @@
 package Nuskin;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
@@ -108,6 +106,20 @@ class Order {
 		this.tax = tax;
 	}
 
+	
+	public ArrayList<Product>  getUnknownProductTypes() {
+		
+		ArrayList<Product> itemsWithUnknownProductType = new ArrayList<Product>();
+		
+		for (Product product: products) {
+			
+			if (product.getProductType() == null) {
+				itemsWithUnknownProductType.add(product);
+			}
+			
+		}
+		return itemsWithUnknownProductType;
+	}
 	
 	public boolean hasUnknownProductTypes() {
 		

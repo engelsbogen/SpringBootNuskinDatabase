@@ -4,10 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.regex.Matcher;
@@ -252,11 +250,6 @@ public class OrderParserPDF extends OrderParser {
 	    		line = reader.readLine();
 	    	}
 	    	
-	    	// Divi up this orders shipping cost over all the products ordered
-	    	order.applyShippingToProducts();
-	    	
-	    	// Work out the tax paid on each product
-	    	order.applyTaxToProducts();
 	    	
 	    	
 	    	reader.close();
@@ -265,9 +258,15 @@ public class OrderParserPDF extends OrderParser {
 	    	e.printStackTrace();
 	    }
 
-        // Add this order to the database
-	    order.addToDatabase();
-
+        if (!order.hasUnknownProductTypes()) {
+	    	// Divi up this orders shipping cost over all the products ordered
+	    	order.applyShippingToProducts();
+	    	
+	    	// Work out the tax paid on each product
+	    	order.applyTaxToProducts();
+	        // Add this order to the database
+		    order.addToDatabase();
+        }
 	    return order;
 
 	}
