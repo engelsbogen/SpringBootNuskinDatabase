@@ -18,15 +18,6 @@ import org.apache.pdfbox.text.PDFTextStripper;
 
 public class OrderParserPDF extends OrderParser {
 
-	
-	public static void main(String[] args ) {
-
-	    	
-		new OrderParserPDF().parse("/home/adc/eclipse-angular/SpringBootNuskinDatabase/TextFiles/Orders/0235048533.pdf");
-		
-	}
-
-	
 	String readPdfText(String filename) {
 	
 		String text = "";
@@ -60,16 +51,6 @@ public class OrderParserPDF extends OrderParser {
 
 			e.printStackTrace();
 		}
-
-        /*
-		try (PrintWriter out = new PrintWriter(filename + ".txt")) {
-			out.println(text);
-		} 
-		catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		*/
 		
 		return text;
 		
@@ -95,7 +76,8 @@ public class OrderParserPDF extends OrderParser {
    	 	String pattPSVCapture = "([0-9]*(?:\\.[0-9]*)?)";       // Could be 0, or a whole number, or a decimal value. So the decimal point and subsequent digits are optional 
         String pattDescCapture = "(.*)";                        // Anything 
    	 	// Optional /NN.NN PTS. Don't capture the "/" or the " PTS
-   	 	String pattPointsCapture = "(?:/(\\d*(?:\\.\\d*)) PTS)?";           
+        // May also be /NN PTS, ie the decimal point and places are optional
+   	 	String pattPointsCapture = "(?:/(\\d*(?:\\.\\d*)?) PTS)?";           
         
    	 	Pattern pattern= Pattern.compile(pattSKUCapture
    	 			                         + " " + pattDescCapture 
@@ -113,9 +95,18 @@ public class OrderParserPDF extends OrderParser {
    	 		BigDecimal price = new BigDecimal(m.group(4));
    	 		BigDecimal points = new BigDecimal(m.group(5) != null ? m.group(5):"0.00");
    	 		BigDecimal PSV = new BigDecimal(m.group(6));
+   	 		p.quantity = Integer.parseInt(m.group(3)); 
+
+   	 		if (p.quantity > 1) {
+	   	 		// There appears to be an inconsistency in the orders. If more than one of an item is ordered,
+	   	 		// for money, the unit price is .. the unit price, and the total price is unit price * quantity
+	   	 		// If the products are purchased with points, the unit (points) price is the same as the total (points) price
+	  	 		points = points.divide(new BigDecimal(p.quantity));
+   	 		}
+   	 		
    	 		p.product = new Product(SKU, description, price, points, PSV);
 
-   	 		p.quantity = Integer.parseInt(m.group(3)); 
+   	 		
    	 	}
    	 	
    	 	return p;
@@ -139,9 +130,6 @@ public class OrderParserPDF extends OrderParser {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-
-		
 	}
 	
 	
@@ -201,6 +189,10 @@ public class OrderParserPDF extends OrderParser {
 	    		}
 	    		//Total 	$439.50	    		
 	    		else if (line.startsWith("Total")) {
+
+	    			// Check that we added everything up properly
+	    			// TODO need a generic way to report a parsing error to the user. Throwing a runtime exception
+	    			// isn't my best work. On the other hand - this really shouldn't be possible
 	    			if (order.getTotal().compareTo(parseDollars(line)) != 0) {
 	    				throw new RuntimeException();
 	    			}
@@ -242,7 +234,9 @@ public class OrderParserPDF extends OrderParser {
 	    					p = isFullItemDescription(fullLine);
 	    				}
 	    			
-		    			if (p.quantity > 0) order.addProduct(p.product, p.quantity);
+		    			if (p.quantity > 0) {
+		    				order.addProduct(p.product, p.quantity);
+		    			}
 	    			}
 	    			
 	    		}
@@ -251,14 +245,14 @@ public class OrderParserPDF extends OrderParser {
 	    	}
 	    	
 	    	
-	    	
 	    	reader.close();
 	    }
 	    catch (IOException e) {
 	    	e.printStackTrace();
 	    }
 
-        if (!order.hasUnknownProductTypes()) {
+
+        if (!order.hasUnknownProductTypes() && order.hasAllInfo()) {
 	    	// Divi up this orders shipping cost over all the products ordered
 	    	order.applyShippingToProducts();
 	    	
