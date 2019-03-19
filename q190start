@@ -1,1 +1,1 @@
-ansible-playbook deploy.yml
+ansible-playbook deploy.yml --extra-vars doCopy=false
