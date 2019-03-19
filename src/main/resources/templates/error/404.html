@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head> 
+	<title>Nuskin Order - Error</title>
+	<link rel="shortcut icon" href="/favicon.ico"/>
+	<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no"/>
+	<meta name="theme-color" content="#000000"/><link rel="manifest" href="/manifest.json"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet"> 
+</head>
+<body>
+    <img src="/Rosieskin_logo-2.png"
+         height="60"
+         class="d-inline-block align-top"
+         alt="RosieSKIN logo"
+     />
+    <h1 style="font-family: 'Open Sans', sans-serif">Oops... something went wrong.</h1>
+    <h2 style="font-family: 'Open Sans', sans-serif" th:text="${status} + ' ' + ${message} + ' ' + ${error}">Resource not found</h2>
+    <img src="/404.gif" height="200" />
+</body>
+</html>
+
