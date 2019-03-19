@@ -1,8 +1,10 @@
 package Nuskin;
 
 import java.io.IOException;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,6 +30,8 @@ public class ProductDatabase {
     private  ProductTypeRepository productTypeRepository;
 	@Autowired 
     private  OrderRepository orderRepository;
+	@Autowired 
+    private  AccountRepository accountRepository;
 
 	public static ProductDatabase getDB() { return theProductDatabase; }
 	
@@ -35,6 +39,25 @@ public class ProductDatabase {
 	ProductDatabase() {
 		// Bodge to make singleton 
 		theProductDatabase = this;
+	}
+	
+	
+	Account getAccount(String accountNumber) {
+		
+		Optional<Account> acOpt = accountRepository.findById(accountNumber);
+		
+		if (acOpt.isPresent()) return acOpt.get();
+		else return null;
+	}
+	
+	void createAccount(String accountNumber, String accountName, boolean isDistributorAccount) {
+		
+		Account ac = new Account();
+		ac.setAccountName(accountName);
+		ac.setAccountNumber(accountNumber);
+		ac.setDistributorAccount(isDistributorAccount);
+		
+		accountRepository.save(ac);
 	}
 	
 	void addProductType(ProductType productType) {
@@ -106,7 +129,7 @@ public class ProductDatabase {
 		String database="Nuskin";
 		String backupPath = FileRoot.getRoot() + "Backups";
 		
-		String secondaryBackupPath = FileRoot.getSecondaryPath() + "/Backups";
+		String secondaryBackupPath = FileRoot.getSecondaryPath() + "Backups";
 		
 		
 		return doBackup(user,password,database,backupPath, secondaryBackupPath);
@@ -201,14 +224,17 @@ public class ProductDatabase {
  
             if (processStatus == 0) {
                 status = true;
-                log.info("Backup created successfully for " + database );
                 
+                log.info("Backup created successfully for " + database );
                 // Copy backup file to external locations.
                 // (1) USB disk
-                Files.copy(Paths.get(backupPath+"/"+backupFilename), Paths.get(secondaryBackupPath + "/" + backupFilename));
+                Files.copy(Paths.get(backupPath+"/"+backupFilename), Paths.get(secondaryBackupPath + "/" + backupFilename), StandardCopyOption.REPLACE_EXISTING);
+
+                log.info("Secondary Backup created successfully for " + database );
 
                 // (2) The cloud
                 GoogleDrive.upload(backupFilename);
+                log.info("Google Drive Backup created successfully for " + database );
                                 
             } else {
                 status = false;
@@ -217,9 +243,9 @@ public class ProductDatabase {
             
  
         } catch (IOException ioe) {
-            log.error("IOException:", ioe, ioe.getCause());
+            log.error("IOException: %s", ioe.toString());
         } catch (Exception e) {
-            log.error("Exception:", e, e.getCause());
+            log.error("Exception: %s", e.toString());
         }
         return status;
 	}
