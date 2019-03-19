@@ -21,21 +21,10 @@ public class ProductTypeController {
     @PutMapping("/createskus")
     public ResponseEntity<?>  createSkus(@RequestBody ArrayList<ProductType> newSkus) {
     	
-    	
-    	// We only want to update EndUse, Customer, Selling Price and Receipt number
-    	
-    	// So - fetch the current, overwrite those fields, write it back?
-    	for (ProductType newSku : newSkus) {
-    		
-    			
-   			productTypeRepo.save(newSku);
-
-    	}
+		productTypeRepo.saveAll(newSkus);
     	
 		// Flush the changes  
 		productTypeRepo.flush();
-		
-		System.out.println("Flushed database changes");
 		
         return ResponseEntity.ok().build();
     }
