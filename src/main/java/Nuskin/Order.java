@@ -1,6 +1,9 @@
 package Nuskin;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import javax.persistence.Column;
@@ -23,7 +26,7 @@ class Order {
 	@Column
 	String date = "";
 	@Column
-	String shippingAddress;
+	String shippingAddress = "";
 	@Column
 	BigDecimal subtotal = new BigDecimal(0);
 	@Column
@@ -33,6 +36,9 @@ class Order {
 
 	@Transient
 	ArrayList<Product> products = new ArrayList<Product>();
+	
+	@Transient 
+	Account accnt = null;
 
 	@JsonGetter(value="hasUnsoldItems") 
 	public boolean hasUnsoldItems() {
@@ -48,7 +54,42 @@ class Order {
 		return false;
 		
 	}
+
+	public String getMonth() {
+		LocalDate d = LocalDate.parse(date, DateTimeFormatter.ofPattern("M/d/uuuu"));
+		
+		YearMonth yandm = YearMonth.from(d);
+		
+		return yandm.toString();
+		
+	}
 	
+	public String getAccountName() {
+		
+		if (accnt == null) {
+			accnt = ProductDatabase.getDB().getAccount(account);
+		}
+		
+		return accnt.getAccountName();
+		
+	}
+	
+	public String getItemSummary() {
+		
+		String s = "";
+		
+		for (Product p : products) {
+
+			if (s.length() > 0) s+= ","; 
+			
+			s += p.getDescription();
+			
+		}
+		
+		return s;
+	}
+	
+
 	// Provide getters and setters for JSON conversion
 	public String getOrderNumber() {
 		return orderNumber;
@@ -199,6 +240,31 @@ class Order {
 		
 	}
 	
+	
+	boolean isSet(String s) {
+		
+		return !(s == null || s.length() == 0); 
+	}
+	
+	
+	boolean hasAllInfo() {
+		
+		boolean complete = true;
+		
+		if (!isSet(orderNumber)) complete = false;
+		if (!isSet(account)) complete = false;
+		if (!isSet(date)) complete = false;
+		if (!isSet(shippingAddress)) complete = false;
+		if (subtotal.compareTo(BigDecimal.ZERO) == 0 ) complete = false;
+		if (tax.compareTo(BigDecimal.ZERO) == 0) complete = false;
+		// shipping may be zero
+
+		// Must have at least one product item 
+		if (products.isEmpty()) complete = false;
+		
+		
+		return complete;
+	}
 	
 	void show() {
 		System.out.println("Order number: " + orderNumber);
