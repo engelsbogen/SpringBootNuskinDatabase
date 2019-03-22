@@ -67,7 +67,7 @@ public class Product  {
 	public String getSku() {
 		return (productType == null ? this.sku : productType.getSku());
 	}
-	
+
 	public BigDecimal getTax() {
 		return tax;
 	}
@@ -101,7 +101,11 @@ public class Product  {
 	}
 
 	public BigDecimal getCostPoints() {
-		return costPoints;
+		
+		if (this.costPoints.compareTo(BigDecimal.ZERO) == 0) {
+			return (productType == null ? BigDecimal.ZERO : productType.getPsv());
+		}
+		else return costPoints;
 	}
 
 	public void setCostPoints(BigDecimal costPoints) {
@@ -172,7 +176,7 @@ public class Product  {
 		this.description = this.description.trim();
 		
 		if (!this.description.equals(other.description) ) {
-			System.err.println("Shipping does not match");
+			System.err.println("Description does not match," + this.getDescription() + "/" + other.getDescription());
 		}
 		if (this.costPrice.compareTo(other.costPrice) != 0) {
 			System.err.println("Product cost price does not match");
@@ -184,7 +188,7 @@ public class Product  {
 			System.err.println("Product cost points does not match");
 		}
 		if (this.tax.compareTo(other.tax) != 0) {
-			System.err.println("Product tax does not match");
+			System.err.println("Product tax does not match: " + this.getTax() + "/" + other.getTax());
 		}
 		
 	}
@@ -196,6 +200,12 @@ public class Product  {
 		this.costPoints = costPoints;
 		this.description = description;
 		this.sku = SKU;
+
+		// costPoints is used here to also mean PSV.
+		// If the item was bought with points then the cost in points is equal to the product PSV.
+		// If the item was bought with cash then the PSV is shown separately on the order
+		// Probably, I don't care about the PSV anyway
+		if (costPoints.compareTo(BigDecimal.ZERO) ==0 ) this.costPoints = psv;
 		
 		// Find productType in the database by SKU 
 		ProductDatabase db = ProductDatabase.getDB();
