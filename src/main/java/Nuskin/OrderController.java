@@ -6,6 +6,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -20,6 +26,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
+
+
+class OrderUploadResponse {
+	
+	String message;
+	
+	List<Product> unknownItems;
+
+	public String getMessage() {
+		return message;
+	}
+
+	public List<Product> getUnknownItems() {
+		return unknownItems;
+	}
+	
+}
 
 @RestController
 public class OrderController {
@@ -77,10 +101,43 @@ public class OrderController {
 		}
 	}
 	
-	
+//	// POST 
+//    @PostMapping("/orderfileuploadmulti")
+//    public ArrayList<Product> orderFilesUploadMultiple(@RequestParam("file") MultipartFile[] files) {
+//
+//      	ArrayList<Product> unknownProductTypes = new ArrayList<Product>();
+//      	
+//        for (MultipartFile file : files) {
+//    		
+//        	
+//        	unknownProductTypes.addAll(orderFileUpload(file));
+//    		
+//    	}
+//    	
+//        return unknownProductTypes;
+//    
+//    }
+//    
+
+    
+    public static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor)
+    {
+        Map<Object, Boolean> map = new ConcurrentHashMap<>();
+        return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+    }
+    
+    
+    // Function<T,R> - function which takes a single argument of type T and returns an R
+    public static Predicate<Product> distinctProductByKey(Function<Product, String> keyExtractor)
+    {
+        Map<String, Boolean> map = new ConcurrentHashMap<>();
+        return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+    }
+    
+    
 	// POST 
     @PostMapping("/orderfileupload")
-    public ArrayList<Product> orderFileUpload(@RequestParam("file") MultipartFile file) {
+    public OrderUploadResponse orderFileUpload(@RequestParam("file") MultipartFile file) {
     	
     	
     	ArrayList<Product> unknownProductTypes = new ArrayList<Product>();
@@ -131,7 +188,18 @@ public class OrderController {
 	    //}
 
         //return ResponseEntity.ok().build();
-    	return unknownProductTypes;
+
+    	// Remove duplicates from unknown items
+    	
+    	OrderUploadResponse resp = new OrderUploadResponse();
+    	
+    	resp.message = "Order uploaded";
+    	resp.unknownItems = 	 unknownProductTypes.stream()
+    	                   .filter( distinctProductByKey(p -> p.getSku()) )
+    			           .collect(Collectors.toList());
+
+    	
+    	return resp;
     }
 
 	    
