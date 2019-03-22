@@ -104,6 +104,13 @@ public class OrderParserPDF extends OrderParser {
 	  	 		points = points.divide(new BigDecimal(p.quantity));
    	 		}
    	 		
+   	 		// So ... if bought with points, the PSV is the PTS field.
+   	 		// If bought with cash, the PSV is the PSV
+   	 		// Note that some products have no PSV
+   	 		if (points.compareTo(BigDecimal.ZERO) != 0) {
+   	 			PSV = points;
+   	 		}
+   	 		
    	 		p.product = new Product(SKU, description, price, points, PSV);
 
    	 		
