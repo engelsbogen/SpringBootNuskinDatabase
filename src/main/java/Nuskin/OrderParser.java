@@ -85,7 +85,10 @@ public class OrderParser {
     }
 	
 	BigDecimal parseDollars(String s) {
-		return  new BigDecimal(s.substring(s.indexOf('$')+1));
+		// Remove commas if the order is > $1000!
+		String ss = s.substring(s.indexOf('$')+1);
+		ss = ss.replaceAll(",", "");
+		return  new BigDecimal(ss);
 	}
 	
 	
