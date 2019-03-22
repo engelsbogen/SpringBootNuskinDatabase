@@ -1,10 +1,17 @@
 package Nuskin;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -73,20 +80,50 @@ class Order {
 		return accnt.getAccountName();
 		
 	}
+
+	
+    // Function<T,R> - function which takes a single argument of type T and returns an R
+    public static Predicate<Product> distinctProductByKey(Function<Product, String> keyExtractor)
+    {
+        Map<String, Boolean> map = new ConcurrentHashMap<>();
+        return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+    }
+    
 	
 	public String getItemSummary() {
 		
-		String s = "";
+		final StringBuilder sb = new StringBuilder();
+/*
+		// Group items with the same SKU together
+		Map<String, List<Product>> map = products.stream().collect(Collectors.groupingBy( Product::getSku));
 		
-		for (Product p : products) {
-
-			if (s.length() > 0) s+= ","; 
-			
-			s += p.getDescription();
-			
-		}
+		// Counting
+		map.forEach( (k,v) -> { 
+			if (sb.length() > 0) sb.append(",");
+		    sb.append(v.get(0).getDescription());
+		    
+		    if (v.size() > 1) {
+		    	sb.append( " [x" + v.size() + "]");
+		    }
 		
-		return s;
+		});
+*/
+		// Alternatively, group items with the same DESCRIPTION together
+		Map<String, Long> descMap = products.stream().collect(Collectors.groupingBy(Product::getDescription, Collectors.counting()));
+		
+		descMap.forEach((desc, count) -> {
+			
+			if (sb.length() > 0) sb.append(",");
+		    sb.append(desc);
+		    
+		    if (count > 1) {
+		    	sb.append( " [x" + count + "]");
+		    }
+			
+		});
+		
+	
+		return sb.toString();
 	}
 	
 
@@ -195,23 +232,35 @@ class Order {
 	}
 	
 	void applyShippingToProducts() {
-		int numberOfItems = products.size();
-		BigDecimal shippingCostPerItem = shipping.divide(new BigDecimal(numberOfItems));
-		for (Product product: products) {
-			product.setShipping(shippingCostPerItem);
+
+		if (shipping.compareTo(BigDecimal.ZERO) != 0) {
+			int numberOfItems = products.size();
+			// Shipping is subject to tax
+			// Need to set a scale and a rounding for BigDecimal.divide otherwise can get arithmetic exceptions
+			BigDecimal shippingCostPerItem = shipping.multiply(getTaxRate()).divide(new BigDecimal(numberOfItems), 2, RoundingMode.HALF_UP);
+			
+			for (Product product: products) {
+				product.setShipping(shippingCostPerItem);
+			}
 		}
 	}
 
-	void applyTaxToProducts() {
+	BigDecimal sumItemTax() {
 		
-		// If this is a preferred customer account, tax is % of the wholesale price
-		// If its a distributor account, tax is % of the retail price
-		// This applies also to product bought with points
-		
-		// First can I work out if its a distributor account from the order, or do I just
-		// go off knowing the account number?
 		BigDecimal taxSum = new BigDecimal(0);
-		boolean isDistributorAccount = account.startsWith("CA6");
+		
+		for (Product product: products) {
+			taxSum = taxSum.add(product.getTax());
+		}
+		
+		// Shipping is also subject to tax
+		taxSum.add(shipping.multiply(getTaxRate()));
+
+		return taxSum;
+	}
+	
+	
+	private BigDecimal getTaxRate() {
 		
 		// HST rate depends on the shipping address
 		// For Ontario, its 13%
@@ -226,16 +275,68 @@ class Order {
 			taxRate = new BigDecimal("0.13");
 		}
 		
+		return taxRate;
+		
+	}
+	
+	void applyTaxToProducts() {
+		
+		// If this is a preferred customer account, tax is % of the wholesale price
+		// If its a distributor account, tax is % of the retail price
+		// This applies also to product bought with points
+		
+		// First can I work out if its a distributor account from the order, or do I just
+		// go off knowing the account number?
+		BigDecimal taxSum = new BigDecimal(0);
+		boolean isDistributorAccount = account.startsWith("CA6");
+		
+		BigDecimal taxRate = getTaxRate();
+		
 		for (Product product: products) {
 			product.calculateTax(isDistributorAccount, taxRate);
-			taxSum = taxSum.add(product.getTax());
 		}
+
+		taxSum = sumItemTax();
 		
 		if (taxSum.compareTo(tax) != 0 ) {
 			System.err.println("Expected tax " + taxSum + " Actual tax charged " + tax);
+			
+			// OK, something went wrong. Maybe a product price has changed 
+			
+			// This can happen if either or both:
+			//  (a) products were purchased with points. Tax is charged on retail or wholesale price
+			//  (b) order made on a distributor account, cost is wholesale price but tax is charged on the retail price
+			
+			// Under these circumstances we don't have sufficient information on the order, as it does not itemise tax
+			// so we are relying on the product type (SKU) database to provide the price information. If the price has 
+			// changed, or perhaps a special offer, then it won't match.
+			
+			// For case (a), maybe we could compare the points cost with the database - a price change may also imply a
+			// points value change
+			// I can't know which item or items are wrong, will instead simply make an 
+			// adjustment to each product.
+
+			// To avoid ArithmeticException: Non-terminating decimal expansion; no exact representable decimal result
+			// have to provide scale and rounding mode. Use sufficient decimal places (6 seems ok) to get the accuracy to 1 penny. 
+			BigDecimal adjustRatio = tax.divide(taxSum, 6, RoundingMode.HALF_UP);
+	
+			for (Product product: products) {
+				BigDecimal newTax = product.getTax().multiply(adjustRatio);
+				product.setTax(newTax.setScale(2, RoundingMode.HALF_UP));
+			}
+
+			// Might be pennies out still
+			taxSum = sumItemTax();
+			
+			if (taxSum.compareTo(tax) != 0 ) {
+				System.err.println("Adjusted expected tax " + taxSum + " Actual tax charged " + tax);
+			}
+			else {
+				System.err.println("After adjustment, sum = actual tax charged = " + tax);
+			}
 		}
 		else {
-			System.err.println("Expected tax " + taxSum + " Actual tax charged " + tax);
+			System.err.println("Expected tax matches actual tax charged: " + tax);
 		}
 		
 	}
@@ -285,7 +386,11 @@ class Order {
 		
 		ProductDatabase db = ProductDatabase.getDB();
 		products = db.getOrderItems(this.orderNumber); 
-		// Make sure they are sorted by item number 
+
+		// Make sure they are sorted by ID so they are in the same order as 
+		// when the Order was added to the database
+		Collections.sort( products, (p1, p2) -> { return (int)(p1.getId() - p2.getId()); });
+		
 	}
 	
 	
