@@ -1,0 +1,1 @@
+java -agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=y -jar target/nuskin-order-manager-0.1.0.jar
