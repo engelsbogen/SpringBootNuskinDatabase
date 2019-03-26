@@ -126,13 +126,23 @@ public class ProductDatabase {
 		
 		String user="adc";
 		String password="letmein";
+		
 		String database="Nuskin";
 		String backupPath = FileRoot.getRoot() + "Backups";
 		
 		String secondaryBackupPath = FileRoot.getSecondaryPath() + "Backups";
 		
+		String[] years = { "2018", "2019" };
 		
-		return doBackup(user,password,database,backupPath, secondaryBackupPath);
+		boolean status = true;
+		
+		for (String year : years ) {
+		
+		  status &= doBackup(user,password,database + year, backupPath, secondaryBackupPath);
+		}
+		
+		return status;
+		
 	}
 	
     
@@ -233,6 +243,7 @@ public class ProductDatabase {
                 log.info("Secondary Backup created successfully for " + database );
 
                 // (2) The cloud
+                // Don't do this in dev environment
                 GoogleDrive.upload(backupFilename);
                 log.info("Google Drive Backup created successfully for " + database );
                                 
