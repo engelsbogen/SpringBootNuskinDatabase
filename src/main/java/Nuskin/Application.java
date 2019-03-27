@@ -26,25 +26,13 @@ public class Application implements CommandLineRunner {
 		
 		boolean populateDatabase = false;
 		boolean backupDatabase = true;
-		boolean createAccounts = false;
-		
-		
+	
 		if (args.length > 0) {
 			backupDatabase = false;
 		}
 		if (backupDatabase) {
 			// Might make sense to backup every time we start as well as the scheduled backup every day at midnight
 			db.backup();
-		}
-		
-	
-		if (createAccounts) {
-			
-			db.createAccount("CA00331358", "rosie gong", false);
-			db.createAccount("CA6053272", "XIAOJUN GONG", true);
-			db.createAccount("CA00356068", "andrew camm", false);
-			db.createAccount("CA00372279", "LIN HAN", false);			
-			
 		}
 		
 		if (populateDatabase) {
