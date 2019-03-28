@@ -1,6 +1,8 @@
 package Nuskin;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -229,10 +231,20 @@ public class ProductDatabase {
 		
         boolean status = false;
         
+        InetAddress ip;
+        String hostname = "";
+        try {
+            ip = InetAddress.getLocalHost();
+            hostname = ip.getHostName();
+        } 
+        catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        
         try {
             DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
             Date date = new Date();
-            String backupFilename = "backup-" + database + "-" + dateFormat.format(date) + ".sql";
+            String backupFilename = "backup-" + hostname + '-' + database + "-" + dateFormat.format(date) + ".sql";
             
             ProcessBuilder pb = new ProcessBuilder("mysqldump", 
             		                               "-u", user,
