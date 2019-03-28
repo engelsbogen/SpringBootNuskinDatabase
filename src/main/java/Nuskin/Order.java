@@ -47,6 +47,9 @@ class Order {
 	@Transient 
 	Account accnt = null;
 
+	@Transient
+	final BigDecimal oneCent = new BigDecimal("0.01");
+	
 	@JsonGetter(value="hasUnsoldItems") 
 	public boolean hasUnsoldItems() {
 		
@@ -219,6 +222,149 @@ class Order {
 		return total;
 	}
 	
+	BigDecimal getTaxOnShipping() {
+		return shipping.multiply(getTaxRate())
+                       .setScale(2, RoundingMode.HALF_UP);
+	}
+	
+	
+	BigDecimal getShippingIncTax() {
+		// Shipping is also subject to tax
+		return shipping.add(getTaxOnShipping());
+	}
+	
+	BigDecimal getItemCost() {
+		BigDecimal sum = BigDecimal.ZERO;
+		
+		for (Product p : products) {
+			sum = sum.add(p.getCostPrice());
+		}
+		
+		if (sum.compareTo(this.getSubtotal()) != 0) {
+			System.err.println(orderNumber + ": sum of item cost " + sum + " is not equal to order subtotal " + getSubtotal());
+		}
+		
+		return sum;
+	}
+	BigDecimal getItemTax() {
+		BigDecimal sum = BigDecimal.ZERO;
+		
+		for (Product p : products) {
+			sum = sum.add(p.getTax());
+		}
+		
+		BigDecimal itemTax = getTax().subtract(getTaxOnShipping());
+		
+		if (sum.compareTo(itemTax) != 0) {
+			System.err.println(orderNumber+ ": sum of item tax " + sum + " is not equal to order tax " + itemTax);
+		}
+		return sum;
+	}
+	
+	BigDecimal sumItemAndShippingTax() {
+		
+		BigDecimal taxSum = getItemTax();
+		
+		// Shipping is also subject to tax
+		taxSum = taxSum.add(getTaxOnShipping());
+		
+		return taxSum;
+	}
+	
+	
+	BigDecimal getItemShipping() {
+		BigDecimal sum = BigDecimal.ZERO;
+		
+		for (Product p : products) {
+			sum = sum.add(p.getShipping());
+		}
+		
+		BigDecimal orderShipping = this.getShippingIncTax();
+		
+		if (sum.compareTo(orderShipping) != 0) {
+			// We might be one cent out for each item
+			System.err.println(orderNumber + ": sum of item shipping " + sum + " is not equal to order shipping " + orderShipping);
+		}
+		return sum;
+	}
+
+	
+	BigDecimal getSales() {
+		
+		BigDecimal sales = BigDecimal.ZERO;
+		for (Product product: products) {
+			
+			if (product.getEndUse() == Product.EndUse.SOLD) {
+				sales = sales.add(product.getSellingPrice());
+			}
+		}
+
+		return sales;
+		
+	}
+	
+	BigDecimal getCost(Product.EndUse endUse) {
+		
+		// Cost of items still in stock
+		BigDecimal val = BigDecimal.ZERO;
+		for (Product product: products) {
+			
+			if (product.getEndUse() == endUse) {
+				val = val.add(product.getTotalCost());
+			}
+		}
+		return val;
+	}
+	
+	BigDecimal getSalesCost() {
+		return getCost(Product.EndUse.SOLD);
+	}
+	BigDecimal getInventoryCost() {
+		return getCost(Product.EndUse.INSTOCK);
+	}
+	BigDecimal getSampleCost() {
+		return getCost(Product.EndUse.SAMPLE);
+	}
+	BigDecimal getPersonalUseCost() {
+		return getCost(Product.EndUse.PERSONAL);
+	}
+	BigDecimal getDemoCost() {
+		return getCost(Product.EndUse.DEMO);
+	}
+	
+	int getItemCount(Product.EndUse endUse) {
+		
+		int count = 0;
+		
+		for (Product product: products) {
+			
+			if (product.getEndUse() == endUse) {
+				count++;
+			}
+		}
+		return count;
+		
+	}
+	
+	int getPurchasedItemCount() {
+		return products.size();
+	}
+	int getSoldItemCount() {
+		return getItemCount(Product.EndUse.SOLD);
+	}
+	int getInventoryItemCount() {
+		return getItemCount(Product.EndUse.INSTOCK);
+	}
+	int getSampleItemCount() {
+		return getItemCount(Product.EndUse.SAMPLE);
+	}
+	int getPersonalUseItemCount() {
+		return getItemCount(Product.EndUse.PERSONAL);
+	}
+	int getDemoItemCount() {
+		return getItemCount(Product.EndUse.DEMO);
+	}
+	
 	void addProduct(Product p, int quantity) {
 		
 		p.order = this;
@@ -237,28 +383,15 @@ class Order {
 			int numberOfItems = products.size();
 			// Shipping is subject to tax
 			// Need to set a scale and a rounding for BigDecimal.divide otherwise can get arithmetic exceptions
-			BigDecimal shippingCostPerItem = shipping.multiply(getTaxRate()).divide(new BigDecimal(numberOfItems), 2, RoundingMode.HALF_UP);
-			
+			BigDecimal shippingCostPerItem = getShippingIncTax().divide(new BigDecimal(numberOfItems), 2, RoundingMode.HALF_UP);
+			                                                    
 			for (Product product: products) {
 				product.setShipping(shippingCostPerItem);
 			}
 		}
 	}
 
-	BigDecimal sumItemTax() {
-		
-		BigDecimal taxSum = new BigDecimal(0);
-		
-		for (Product product: products) {
-			taxSum = taxSum.add(product.getTax());
-		}
-		
-		// Shipping is also subject to tax
-		taxSum.add(shipping.multiply(getTaxRate()));
 
-		return taxSum;
-	}
-	
 	
 	private BigDecimal getTaxRate() {
 		
@@ -296,15 +429,20 @@ class Order {
 			product.calculateTax(isDistributorAccount, taxRate);
 		}
 
-		taxSum = sumItemTax();
+		taxSum = sumItemAndShippingTax();
 		
-		if (taxSum.compareTo(tax) != 0 ) {
+		BigDecimal error = taxSum.subtract(getTax()).abs();
+
+		if (error.compareTo(oneCent) > 0) {
+		
 			System.err.println("Expected tax " + taxSum + " Actual tax charged " + tax);
 			
-			// OK, something went wrong. Maybe a product price has changed 
+			// OK, something went wrong. Maybe a product price has changed or is wrong in the database
 			
 			// This can happen if either or both:
 			//  (a) products were purchased with points. Tax is charged on retail or wholesale price
+			//      Its also possible that products bought with points on a distributor account are taxed on the wholesale price 
+			//      - that seems to get close to (but not exactly) the actual tax charged on at least one order
 			//  (b) order made on a distributor account, cost is wholesale price but tax is charged on the retail price
 			
 			// Under these circumstances we don't have sufficient information on the order, as it does not itemise tax
@@ -313,12 +451,19 @@ class Order {
 			
 			// For case (a), maybe we could compare the points cost with the database - a price change may also imply a
 			// points value change
-			// I can't know which item or items are wrong, will instead simply make an 
-			// adjustment to each product.
+			// I can't know which item or items are wrong, will instead simply make an adjustment to each product, as 
+			// we don't need to account for GST/HST to CRA, just need to know how much we should be charging to cover
+			// our costs.
 
 			// To avoid ArithmeticException: Non-terminating decimal expansion; no exact representable decimal result
-			// have to provide scale and rounding mode. Use sufficient decimal places (6 seems ok) to get the accuracy to 1 penny. 
-			BigDecimal adjustRatio = tax.divide(taxSum, 6, RoundingMode.HALF_UP);
+			// have to provide scale and rounding mode. Use sufficient decimal places (6 seems ok) to get the accuracy to 1 penny.
+
+			// We need to REMOVE the shipping tax as we know what that is and we've added it to the 
+			// shipping cost per item. Adjust only the item tax.
+			BigDecimal a = tax.subtract(this.getTaxOnShipping());
+			BigDecimal b = getItemTax();
+			
+			BigDecimal adjustRatio = a.divide(b, 8, RoundingMode.HALF_UP);
 	
 			for (Product product: products) {
 				BigDecimal newTax = product.getTax().multiply(adjustRatio);
@@ -326,7 +471,7 @@ class Order {
 			}
 
 			// Might be pennies out still
-			taxSum = sumItemTax();
+			taxSum = sumItemAndShippingTax();
 			
 			if (taxSum.compareTo(tax) != 0 ) {
 				System.err.println("Adjusted expected tax " + taxSum + " Actual tax charged " + tax);
@@ -393,6 +538,47 @@ class Order {
 		
 	}
 	
+	
+	
+	void correctTaxAndShipping() {
+		
+		BigDecimal itemShipping = getItemShipping();
+		
+		boolean fixNeeded  = false;
+
+		// Fix shipping first, as there was a gross error in the calculation of the tax
+		// on shipping
+		
+		if (this.getShippingIncTax().compareTo(itemShipping) != 0 ) {
+			fixNeeded = true;
+			System.err.println("Fixing shipping");
+			applyShippingToProducts();
+		}
+
+		BigDecimal taxOnOrder = getTax();
+		BigDecimal taxOnItems = sumItemAndShippingTax(); // includes tax on shipping
+		
+		// If its 1 cent its probably not worth bothering
+		BigDecimal error = taxOnOrder.subtract(taxOnItems).abs();
+			
+		if (error.compareTo( oneCent ) > 0 ) {
+			fixNeeded = true;
+			System.err.println("Fixing tax");
+			applyTaxToProducts();
+		}
+
+		if (fixNeeded) {
+		
+			ProductDatabase db = ProductDatabase.getDB();
+	
+			//db.addOrder(this);  // Not modifying this, just the items' tax and shipping
+			
+			// Add each product to the database
+			for (Product product : products) {
+				db.addProduct(product);
+			}
+		}
+	}
 	
 	void addToDatabase() {
 		ProductDatabase db = ProductDatabase.getDB();

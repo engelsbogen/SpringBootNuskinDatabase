@@ -167,7 +167,14 @@ public class Product  {
 		this.shipping = shipping;
 	}
 	
-
+	public BigDecimal getTotalCost() {
+		BigDecimal cost = this.costPrice;
+		cost = cost.add(this.tax);
+		cost = cost.add(this.shipping);
+		return cost;
+	}
+	
+	
 	// Check get the same result reading a PDF and a text file
 	void compare(Product other) {
 		

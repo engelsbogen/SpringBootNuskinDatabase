@@ -95,6 +95,18 @@ public class ProductDatabase {
 		return order;
 	}
 	
+	Iterable<Order> getOrders() {
+
+		Iterable<Order> orders = orderRepository.findAll();
+		
+		for (Order order: orders) {
+			order.getProductsFromDatabase();
+		}
+		return orders;
+	}
+
+	
+	
 	ProductType findProductType(String SKU) {
 		Optional<ProductType> productType = productTypeRepository.findBySku(SKU);
 		
@@ -120,6 +132,8 @@ public class ProductDatabase {
 		
 		return items;
 	}
+	
+	
 	
     @Scheduled(cron = "0 0 0 * * *")  // Backup at midnight every day
 	public boolean backup() {
