@@ -20,6 +20,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name="orders")
@@ -84,6 +85,17 @@ class Order {
 		
 	}
 
+	@JsonIgnore
+	public String getMonthName() {
+
+		LocalDate d = LocalDate.parse(date, DateTimeFormatter.ofPattern("M/d/uuuu"));
+		
+		String s = d.format(DateTimeFormatter.ofPattern("MMM"));
+		
+		return s;
+		
+	}
+	
 	
     // Function<T,R> - function which takes a single argument of type T and returns an R
     public static Predicate<Product> distinctProductByKey(Function<Product, String> keyExtractor)
