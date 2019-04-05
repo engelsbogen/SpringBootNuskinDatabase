@@ -71,7 +71,7 @@ public class OrderParserPDF extends OrderParser {
    	 	String pattSKUCapture = "(^[0-9]{8}+)";                         // 8 digits
    	 	// $ followed by any number of digits, decimal point, then two more digits
    	 	// Dont capture the $
-   	 	String pattPriceCapture =  "\\$([0-9]*\\.[0-9][0-9])";  
+   	 	String pattPriceCapture =  "\\$([0-9,]*\\.[0-9][0-9])";  
    	 	String pattQuantityCapture = "([0-9]*)";                // Any number of digits (though if more that 2 digits is unlikely)
    	 	String pattPSVCapture = "([0-9]*(?:\\.[0-9]*)?)";       // Could be 0, or a whole number, or a decimal value. So the decimal point and subsequent digits are optional 
         String pattDescCapture = "(.*)";                        // Anything 
@@ -79,12 +79,14 @@ public class OrderParserPDF extends OrderParser {
         // May also be /NN PTS, ie the decimal point and places are optional
    	 	String pattPointsCapture = "(?:/(\\d*(?:\\.\\d*)?) PTS)?";           
         
-   	 	Pattern pattern= Pattern.compile(pattSKUCapture
-   	 			                         + " " + pattDescCapture 
-   	 			                         + " " + pattQuantityCapture 
-   	 			                         + " " + pattPriceCapture + pattPointsCapture
-   	 			                         + " " + pattPSVCapture 
-   	 			                         + " " + pattPriceCapture + pattPointsCapture);
+   	 	String sPattern = pattSKUCapture
+                    + " " + pattDescCapture 
+                    + " " + pattQuantityCapture 
+                    + " " + pattPriceCapture + pattPointsCapture
+                    + " " + pattPSVCapture 
+                    + " " + pattPriceCapture + pattPointsCapture;
+   	 	
+   	 	Pattern pattern= Pattern.compile(sPattern);
    	 	
    	 	Matcher m = pattern.matcher(line);
   	 	
@@ -92,7 +94,10 @@ public class OrderParserPDF extends OrderParser {
    	 		String SKU = m.group(1);
    	 		String description = m.group(2);
    	 		
-   	 		BigDecimal price = new BigDecimal(m.group(4));
+   	 		// Need to remove commas from the price (if >$1000)
+   	 		String sPrice = m.group(4).replaceAll(",", "");
+   	 		
+   	 		BigDecimal price = new BigDecimal(sPrice);
    	 		BigDecimal points = new BigDecimal(m.group(5) != null ? m.group(5):"0.00");
    	 		BigDecimal PSV = new BigDecimal(m.group(6));
    	 		p.quantity = Integer.parseInt(m.group(3)); 
@@ -208,7 +213,7 @@ public class OrderParserPDF extends OrderParser {
 	    			
 	    			// May be the start of an item 
 	    			if (startsWithAnSKU(line)) {
-	    				
+	    				System.out.println(line);
 	    				// If this is a complete item then it ends with quantity, unit price, PSV and total price  
 	    				// Eg
 	    				// 02110308 Enhancer II
@@ -225,7 +230,6 @@ public class OrderParserPDF extends OrderParser {
 	    				// 0 $0.00/9.5
 	    				// PTS
 
-	    				
 	    				// 02110308 Enhancer II (CA) 1 $14.50 9.5 $14.50
 	    				// 02110826 Epoch Firewalker Foot Cream 100ml (CA) 1 $0.00/9.5 PTS 0 $0.00/9.5 PTS
 	    				// But we need to delimite the fields with TABs 
