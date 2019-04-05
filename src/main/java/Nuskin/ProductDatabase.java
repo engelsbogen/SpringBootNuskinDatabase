@@ -81,8 +81,16 @@ public class ProductDatabase {
 		productRepository.save(product);
 	}
 	
+	void deleteProduct(Product product) {
+		productRepository.deleteById(product.getId());
+	}
+	
 	void addOrder(Order order) {
 		orderRepository.save(order);
+	}
+	
+	void deleteOrder(Order order) {
+		orderRepository.deleteById(order.getOrderNumber());
 	}
 	
 	Order getOrder(String orderNumber) {

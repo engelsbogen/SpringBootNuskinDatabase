@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -72,6 +73,22 @@ public class OrderController {
     }
 	
 	
+	@DeleteMapping(value="/deleteorder")
+    public ResponseEntity<?>  deleteOrder(@RequestParam String orderNumber) {
+    	
+		ProductDatabase db = ProductDatabase.getDB();
+		
+		Order existing = db.getOrder(orderNumber);
+		if (existing != null) {
+
+            existing.deleteFromDatabase();
+			
+        	return ResponseEntity.ok().build();
+    	}
+    	else {
+    		return ResponseEntity.badRequest().build();
+    	}
+    }
 	
 	@RequestMapping("/orderfiledownload")
 	public  ResponseEntity<Resource> orderFileDownload(@RequestParam("orderNumber") String orderNumber, Model model) {

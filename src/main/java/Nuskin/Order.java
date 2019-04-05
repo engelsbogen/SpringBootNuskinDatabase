@@ -66,6 +66,22 @@ class Order {
 		
 	}
 
+	@JsonGetter(value="hasOnlyInStockItems") 
+	public boolean hasOnlyInStockItems() {
+		
+		for (Product product: products) {
+			
+			if (product.getEndUse() != Product.EndUse.INSTOCK) {
+				return false;
+			}
+		}
+		
+		// Only instock items found
+		return true;
+		
+	}
+	
+	
 	public String getMonth() {
 		LocalDate d = LocalDate.parse(date, DateTimeFormatter.ofPattern("M/d/uuuu"));
 		
@@ -80,8 +96,12 @@ class Order {
 		if (accnt == null) {
 			accnt = ProductDatabase.getDB().getAccount(account);
 		}
-		
-		return accnt.getAccountName();
+		if (accnt != null) {
+			return accnt.getAccountName();
+		}
+		else {
+			return "Unknown";
+		}
 		
 	}
 
@@ -591,6 +611,22 @@ class Order {
 			}
 		}
 	}
+	
+	
+	void deleteFromDatabase() {
+		
+		ProductDatabase db = ProductDatabase.getDB();
+		
+		for (Product product: products) {
+			
+			db.deleteProduct(product);
+			
+		}
+		
+		db.deleteOrder(this);
+		
+	}
+	
 	
 	void addToDatabase() {
 		ProductDatabase db = ProductDatabase.getDB();

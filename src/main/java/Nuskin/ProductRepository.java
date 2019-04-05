@@ -3,6 +3,8 @@ package Nuskin;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 
@@ -13,5 +15,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     Optional<Product> findById(@Param("id") Long id);
 
+    @Transactional
+    void deleteById(Long id);
 
 }

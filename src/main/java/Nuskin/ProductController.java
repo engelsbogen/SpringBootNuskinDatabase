@@ -50,7 +50,7 @@ public class ProductController {
     			Product existingItem = existingItemOpt.get();
     			existingItem.setReceiptNumber(updatedItem.getReceiptNumber());
     			existingItem.setEndUse(updatedItem.getEndUse());
-    			existingItem.setSellingPrice(updatedItem.getSellingPrice());
+    			existingItem.setSellingPrice(updatedItem.getSellingPrice().toString());
     			existingItem.setCustomerName(updatedItem.getCustomerName());
     			
     			// This actually creates or updates - but as I know its an existing item it just updates

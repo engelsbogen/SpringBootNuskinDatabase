@@ -116,8 +116,14 @@ public class Product  {
 		return sellingPrice;
 	}
 
-	public void setSellingPrice(BigDecimal sellingPrice) {
-		this.sellingPrice = sellingPrice;
+	//public void setSellingPrice(BigDecimal sellingPrice) {
+	//	this.sellingPrice = sellingPrice;
+	//}
+	
+	// Need to take a String in order to replace commas in values > $1000 - the Jackson code calls 
+	// this function directly when creating from Json in the HTTP request
+	public void setSellingPrice(String sSellingPrice) {
+		this.sellingPrice = new BigDecimal(sSellingPrice.replaceAll(",", ""));
 	}
 
 	public String getReceiptNumber() {
@@ -290,16 +296,25 @@ public class Product  {
 			taxRate = BigDecimal.ZERO;
 		}
 		
-		if (costPrice.compareTo(new BigDecimal("0.0")) == 0) {
-			// If bought with product points, tax is charged at what?? Its some function of the point value I think.
+		if (costPrice.compareTo(BigDecimal.ZERO) == 0) {
 			
-			// For now go off the retail/wholesale price from the ProductType database, see if that works
-			if (isDistributorAccount) {
-				// If bought through distrubutor account, tax is charged on the retail price.
-				tax = productType.retailPrice.multiply(taxRate);
+			if (costPoints.compareTo(BigDecimal.ZERO) == 0) {
+				
+				// Neither points nor money - real cost zero hence tax zero
+				tax = BigDecimal.ZERO;
 			}
 			else {
-				tax = productType.wholesalePrice.multiply(taxRate);
+			
+				// If bought with product points, tax is charged at what?? Its some function of the point value I think.
+				
+				// For now go off the retail/wholesale price from the ProductType database, see if that works
+				if (isDistributorAccount) {
+					// If bought through distrubutor account, tax is charged on the retail price.
+					tax = productType.retailPrice.multiply(taxRate);
+				}
+				else {
+					tax = productType.wholesalePrice.multiply(taxRate);
+				}
 			}
 		}
 		else {
