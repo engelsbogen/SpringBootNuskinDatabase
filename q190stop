@@ -1,1 +1,1 @@
-ansible-playbook deploy.yml --extra-vars doCopy=false,doStart=false
+ansible-playbook deploy.yml --extra-vars "doCopy=false doStart=false"
