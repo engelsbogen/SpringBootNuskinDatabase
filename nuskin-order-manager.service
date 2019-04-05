@@ -1,0 +1,14 @@
+
+[Unit]
+Description=Nuskin order manager service
+
+[Service]
+Type=forking
+User=adc
+WorkingDirectory=/home/adc/nuskin-order-manager
+ExecStart=/usr/bin/nuskin-order-manager.sh start
+# If Type=simple, called after the shell process exits
+# ExecStop=/usr/bin/nuskin-order-manager.sh stop
+
+[Install]
+WantedBy=multi-user.target

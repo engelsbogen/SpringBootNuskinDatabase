@@ -13,10 +13,31 @@
     destRoot: /home/adc/nuskin-order-manager
 
   tasks:
+
+    - name: Copy systemd scripts
+      when: doCopy
+      copy: src=nuskin-order-manager.sh dest=/usr/bin
+      become: true
+    
+    - name: Copy systemd scripts (2)
+      when: doCopy
+      copy: src=nuskin-order-manager.service dest=/lib/systemd/system
+      become: true
+
+    - name: Set logfile permissions
+      when: doCopy
+      shell: touch /var/log/nuskin-order-manager; chown adc /var/log/nuskin-order-manager
+      become: true
+
+#    - name: stop running app
+#      when: doStop
+#      shell: "start-stop-daemon --stop --pidfile {{destRoot}}/nuskin-order-manager.pid"
+#      ignore_errors: true
+
     - name: stop running app
       when: doStop
-      shell: "start-stop-daemon --stop --pidfile {{destRoot}}/nuskin-order-manager.pid"
-      ignore_errors: true
+      shell: systemctl stop nuskin-order-manager
+      become: true
 
     - name: copy backend jar file
       when: doCopy
@@ -39,9 +60,12 @@
       file: path={{destRoot}}/nuskin-order-manager.jar src={{destRoot}}/nuskin-order-manager-{{version}}.jar state=link
 
     # For some reason that I haven't yet established, on the Q190 I cannot run the jar file direct, but it works with java -jar <jarfile>
-    - name: start running app
+#    - name: start running app
+#      when: doStart
+#      shell: "start-stop-daemon --chdir {{destRoot}} --start --background --quiet -m --pidfile {{destRoot}}/nuskin-order-manager.pid --exec /usr/bin/java -- -jar {{destRoot}}/nuskin-order-manager.jar" 
+
+    - name: start app
       when: doStart
-      shell: "start-stop-daemon --chdir {{destRoot}} --start --background --quiet -m --pidfile {{destRoot}}/nuskin-order-manager.pid --exec /usr/bin/java -- -jar {{destRoot}}/nuskin-order-manager.jar" 
-
-
+      become: true
+      shell: systemctl start nuskin-order-manager
 
