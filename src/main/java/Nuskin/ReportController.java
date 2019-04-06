@@ -16,7 +16,7 @@ public class ReportController {
 		
 		Report report = new Report();
 
-		// Period is for example "year", "January", "Jan-Apr", "month"
+		// Period is for example "year", "Jan", "Jan-Apr", "month"
 		report.build(period);
 		
 		return report;

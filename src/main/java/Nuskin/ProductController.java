@@ -27,16 +27,8 @@ public class ProductController {
 		return products;
     }
 	
-	class Dummy {
-		int id = 0;
-
-		public int getId() {
-			return id;
-		}
-	}
-	
     @PutMapping("/updateitems")
-    public Dummy updateItems(@RequestBody ArrayList<Product> updatedItems) {
+    public DummyResponse updateItems(@RequestBody ArrayList<Product> updatedItems) {
     	
     	// We only want to update EndUse, Customer, Selling Price and Receipt number
     	
@@ -68,7 +60,7 @@ public class ProductController {
 		// It seems this is a Firefox feature, Chrome is OK (googling confirms)
 		// Everything works fine apart from the error message, but if I return an object here, it becomes a json
 		// content type and there are no errors in the console.
-        return new Dummy();
+        return new DummyResponse();
     }
 
 	    

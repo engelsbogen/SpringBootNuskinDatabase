@@ -11,6 +11,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -34,13 +35,24 @@ public class ProductDatabase {
     private  OrderRepository orderRepository;
 	@Autowired 
     private  AccountRepository accountRepository;
-
+	@Autowired
+	private CommissionRepository commissionRepository;
+	@Autowired
+	private ExpensesRepository expensesRepository;
+	
 	public static ProductDatabase getDB() { return theProductDatabase; }
 	
 	
 	ProductDatabase() {
 		// Bodge to make singleton 
 		theProductDatabase = this;
+	}
+	
+	List<Expense> findAllExpenses() {
+		return expensesRepository.findAll();
+	}
+	List<Commission> findAllCommission() {
+		return commissionRepository.findAll();
 	}
 	
 	

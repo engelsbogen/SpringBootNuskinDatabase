@@ -7,6 +7,7 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -19,13 +20,20 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.apache.pdfbox.contentstream.operator.markedcontent.EndMarkedContentSequence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name="orders")
 class Order {
-	
+
+	@Transient
+	private Logger  log =  LoggerFactory.getLogger(Order.class);
+
 	@Id
 	@Column(unique=true)
 	String orderNumber = "";
@@ -82,6 +90,7 @@ class Order {
 	}
 	
 	
+	
 	public String getMonth() {
 		LocalDate d = LocalDate.parse(date, DateTimeFormatter.ofPattern("M/d/uuuu"));
 		
@@ -128,35 +137,47 @@ class Order {
 	public String getItemSummary() {
 		
 		final StringBuilder sb = new StringBuilder();
-/*
-		// Group items with the same SKU together
-		Map<String, List<Product>> map = products.stream().collect(Collectors.groupingBy( Product::getSku));
 		
-		// Counting
-		map.forEach( (k,v) -> { 
-			if (sb.length() > 0) sb.append(",");
-		    sb.append(v.get(0).getDescription());
-		    
-		    if (v.size() > 1) {
-		    	sb.append( " [x" + v.size() + "]");
-		    }
-		
-		});
-*/
-		// Alternatively, group items with the same DESCRIPTION together
-		Map<String, Long> descMap = products.stream().collect(Collectors.groupingBy(Product::getDescription, Collectors.counting()));
-		
-		descMap.forEach((desc, count) -> {
+		// Summarize INSTOCK items only
+
+		List<Product> unsoldItems = products.stream()
+				                    .filter( p-> p.getEndUse() == Product.EndUse.INSTOCK )
+                                    .collect(Collectors.toList());
+	
+		if (unsoldItems.size() == 0) {
+			sb.append( "No INSTOCK items");
+		}
+		else {
+			// Group items with the same DESCRIPTION together
+			Map<String, Long> descMap = unsoldItems.stream().collect(Collectors.groupingBy(Product::getDescription, Collectors.counting()));
 			
-			if (sb.length() > 0) sb.append(",");
-		    sb.append(desc);
-		    
-		    if (count > 1) {
-		    	sb.append( " [x" + count + "]");
-		    }
+			descMap.forEach((desc, count) -> {
+				
+				if (sb.length() > 0) sb.append(",");
+			    sb.append(desc);
+			    
+			    if (count > 1) {
+			    	sb.append( " [x" + count + "]");
+			    }
+				
+			});
+			/*
+			// Alternatively, group items with the same SKU together
+			Map<String, List<Product>> map = products.stream().collect(Collectors.groupingBy( Product::getSku));
 			
-		});
-		
+			// Counting
+			map.forEach( (k,v) -> { 
+				if (sb.length() > 0) sb.append(",");
+				// Get the description from the first item in each list
+			    sb.append(v.get(0).getDescription());
+			    
+			    if (v.size() > 1) {
+			    	sb.append( " [x" + v.size() + "]");
+			    }
+			
+			});
+	        */
+		}
 	
 		return sb.toString();
 	}
@@ -572,7 +593,26 @@ class Order {
 	
 	
 	
+	void checkItemCount() {
+		
+		BigDecimal itemCost = getInventoryCost() 
+		                      .add( getSalesCost())
+		                      .add(getSampleCost())
+		                      .add(getPersonalUseCost())
+		                      .add(getDemoCost());
+		
+		if (itemCost.compareTo(getTotal()) != 0 ) {
+			
+			log.error("Order " + getOrderNumber() + " TOTAL " + getTotal() + " ITEM COST " + itemCost);
+			
+		}
+		
+	}
+	
+	
 	void correctTaxAndShipping() {
+		
+		checkItemCount();
 		
 		BigDecimal itemShipping = getItemShipping();
 		

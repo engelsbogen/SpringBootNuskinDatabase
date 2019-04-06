@@ -21,6 +21,10 @@ public class Report {
     BigDecimal itemTax = BigDecimal.ZERO;
     BigDecimal itemShipping = BigDecimal.ZERO;
     
+    BigDecimal expenses = BigDecimal.ZERO;
+    BigDecimal commission = BigDecimal.ZERO;
+    
+
 	Integer openingInventoryItemCount = 0;
     Integer purchasedItemCount = 0;
     Integer orderCount = 0;
@@ -112,6 +116,16 @@ public class Report {
 		return demoCost;
 	}
 
+	public BigDecimal getExpenses() {
+		return expenses;
+	}
+
+	public BigDecimal getCommission() {
+		return commission;
+	}
+
+
+
 	int periodToInt(String period) {
 		
 		final String[] months = {"year", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
@@ -126,27 +140,8 @@ public class Report {
 		return 0;
 	}
 	
-	
-	String periodToLongName(String period) {
-		
-	    Map<String, String> map = new HashMap<String, String>();
-	    map.put("year", "year to date");
-	    map.put("Jan", "January");
-	    map.put("Feb", "February");
-	    map.put("Mar", "March");
-	    map.put("Apr", "April");
-	    map.put("May", "May");
-	    map.put("Jun", "June");
-	    map.put("Jul", "July");
-	    map.put("Aug", "August");
-	    map.put("Sep", "September");
-	    map.put("Oct", "October");
-	    map.put("Nov", "November");
-	    map.put("Dec", "December");
 
-	    return map.get(period);
-	    
-	}
+	
 	
 	void build(String period) {
 		
@@ -158,8 +153,7 @@ public class Report {
 		
 		Iterable<Order> orders = db.getOrders();
 		
-		this.period = periodToLongName(period);
-		
+		this.period = Util.periodToLongName(period);
 	
 		for (Order order : orders) {
 			
@@ -195,6 +189,8 @@ public class Report {
 			
 		}
 		
+		expenses = new ExpenseReport().build(period).getTotal();
+		commission =  new CommissionReport().build(period).getTotal();
 		
 		System.out.println("Finished report");
 		
