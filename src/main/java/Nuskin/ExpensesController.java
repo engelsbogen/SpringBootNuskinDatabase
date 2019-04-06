@@ -1,7 +1,10 @@
 package Nuskin;
 
+import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +32,12 @@ public class ExpensesController {
         return ResponseEntity.ok().build();
     }
 
+    
+	int periodToMonthValue(String period) {
+		
+        return Month.from(DateTimeFormatter.ofPattern("MMM").parse(period)).getValue();
+	}
+    
     class ExpenseReport {
     	
     	String period;
@@ -42,13 +51,24 @@ public class ExpensesController {
 			return expenses;
 		}
 
-    	
     	void build(String period) {
     		
     		this.period = period;
     		this.expenses = expensesRepo.findAll();
+    		
+    		if ( !period.equals("year")) {
+    			// Filter to keep only those for the requested month
+    			
+    			int monthValue = periodToMonthValue(period);
+    			
+    			List<Expense> monthExpenses = this.expenses;
+    			
+    			this.expenses = monthExpenses.stream()
+         	                   .filter( p -> p.getDate().getMonthValue() == monthValue )
+           			           .collect(Collectors.toList());
+    			
+    		}
     	}
-    	
     }
 
     @DeleteMapping(value="/deleteexpense")
