@@ -612,7 +612,8 @@ class Order {
 	
 	void correctTaxAndShipping() {
 		
-		checkItemCount();
+		/// Debug code used when I had the products of an order twice in the database so totals didnt tally
+		//checkItemCount();
 		
 		BigDecimal itemShipping = getItemShipping();
 		
