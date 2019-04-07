@@ -145,7 +145,7 @@ class Order {
                                     .collect(Collectors.toList());
 	
 		if (unsoldItems.size() == 0) {
-			sb.append( "No INSTOCK items");
+			sb.append( "None");
 		}
 		else {
 			// Group items with the same DESCRIPTION together
@@ -182,6 +182,37 @@ class Order {
 		return sb.toString();
 	}
 	
+	public String getDisposedItemSummary() {
+		
+		final StringBuilder sb = new StringBuilder();
+		
+		// Summarize NOT INSTOCK items only
+
+		List<Product> unsoldItems = products.stream()
+				                    .filter( p-> p.getEndUse() != Product.EndUse.INSTOCK )
+                                    .collect(Collectors.toList());
+	
+		if (unsoldItems.size() == 0) {
+			sb.append( "None");
+		}
+		else {
+			// Group items with the same DESCRIPTION together
+			Map<String, Long> descMap = unsoldItems.stream().collect(Collectors.groupingBy(Product::getDescription, Collectors.counting()));
+			
+			descMap.forEach((desc, count) -> {
+				
+				if (sb.length() > 0) sb.append(",");
+			    sb.append(desc);
+			    
+			    if (count > 1) {
+			    	sb.append( " [x" + count + "]");
+			    }
+				
+			});
+		}
+	
+		return sb.toString();
+	}
 
 	// Provide getters and setters for JSON conversion
 	public String getOrderNumber() {
