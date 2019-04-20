@@ -1,7 +1,7 @@
 # connector deployment
 
 - name: deploys the application
-  hosts: Q190
+  hosts: "{{ host | default('Q190') }}"
   remote_user: adc
   vars:
     timestamp: ""
