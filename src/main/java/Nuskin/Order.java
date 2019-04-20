@@ -20,7 +20,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.apache.pdfbox.contentstream.operator.markedcontent.EndMarkedContentSequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,18 +85,14 @@ class Order {
 		
 		// Only instock items found
 		return true;
-		
 	}
 	
 	
 	
 	public String getMonth() {
 		LocalDate d = LocalDate.parse(date, DateTimeFormatter.ofPattern("M/d/uuuu"));
-		
 		YearMonth yandm = YearMonth.from(d);
-		
 		return yandm.toString();
-		
 	}
 	
 	public String getAccountName() {
@@ -134,6 +129,60 @@ class Order {
     }
     
 	
+    
+    class CustomerItems {
+    	
+    	CustomerItems(String name, String desc) {
+    		this.name = name;
+    		this.desc = desc;
+    	}
+    	
+    	String name;
+    	String desc;
+		public String getName() {
+			return name;
+		}
+		public String getDesc() {
+			return desc;
+		}
+    	
+    }
+    
+    public ArrayList<CustomerItems> getSoldItemsPerCustomer() {
+    	
+    	
+    	ArrayList<CustomerItems> perCustomer = new ArrayList<CustomerItems>();
+    	
+    	// Find sold items on this order
+    	List<Product> soldItems = products.stream()
+                .filter( p-> p.getEndUse() == Product.EndUse.SOLD )
+                .collect(Collectors.toList());
+    	
+		
+    	// Sort the sold items by customer name
+		Map<String,  List<Product>> customerMap = soldItems.stream().collect(Collectors.groupingBy(Product::getCustomerName));
+		
+    	// Product a summary for each customer
+		
+		customerMap.forEach( (customer, products) -> {
+			
+			String s = "";
+			
+			for ( Product p: products) {
+				if (s.length() > 0) s += ',';
+				s += p.getDescription();
+			}
+			
+			
+			perCustomer.add(new CustomerItems(customer, s));
+		}
+		);
+		
+		
+		return perCustomer;
+		
+    }
+    
 	public String getItemSummary() {
 		
 		final StringBuilder sb = new StringBuilder();
