@@ -47,38 +47,39 @@ public class MultiTenantConfiguration {
     	
         //File[] files = Paths.get("tenants").toFile().listFiles();
         Map<Object,Object> resolvedDataSources = new HashMap<>();
-
-        for(File propertyFile : files) {
-        	
-            Properties tenantProperties = new Properties();
-            DataSourceBuilder<?> dataSourceBuilder = DataSourceBuilder.create(this.getClass().getClassLoader());
-
-            try {
-                tenantProperties.load(getInputStream(propertyFile));
-
-                String tenantId = tenantProperties.getProperty("name");
-
-                // Assumption: The tenant database uses the same driver class
-                // as the default database that you configure.
-                dataSourceBuilder.driverClassName(properties.getDriverClassName())
-                                 .url(tenantProperties.getProperty("datasource.url"))
-                                 .username(tenantProperties.getProperty("datasource.username"))
-                                 .password(tenantProperties.getProperty("datasource.password"));
-
-                if(properties.getType() != null) {
-                    dataSourceBuilder.type(properties.getType());
-                }
-
-                resolvedDataSources.put(tenantId, dataSourceBuilder.build());
-            } 
-            catch (IOException e) {
-                // Ooops, tenant could not be loaded. This is bad.
-                // Stop the application!
-                e.printStackTrace();
-                return null;
-            }
+        
+        if (files != null) {
+	        for(File propertyFile : files) {
+	        	
+	            Properties tenantProperties = new Properties();
+	            DataSourceBuilder<?> dataSourceBuilder = DataSourceBuilder.create(this.getClass().getClassLoader());
+	
+	            try {
+	                tenantProperties.load(getInputStream(propertyFile));
+	
+	                String tenantId = tenantProperties.getProperty("name");
+	
+	                // Assumption: The tenant database uses the same driver class
+	                // as the default database that you configure.
+	                dataSourceBuilder.driverClassName(properties.getDriverClassName())
+	                                 .url(tenantProperties.getProperty("datasource.url"))
+	                                 .username(tenantProperties.getProperty("datasource.username"))
+	                                 .password(tenantProperties.getProperty("datasource.password"));
+	
+	                if(properties.getType() != null) {
+	                    dataSourceBuilder.type(properties.getType());
+	                }
+	
+	                resolvedDataSources.put(tenantId, dataSourceBuilder.build());
+	            } 
+	            catch (IOException e) {
+	                // Ooops, tenant could not be loaded. This is bad.
+	                // Stop the application!
+	                e.printStackTrace();
+	                return null;
+	            }
+	        }
         }
-
         // Create the final multi-tenant source.
         // It needs a default database to connect to.
         // Make sure that the default database is actually an empty tenant database.
