@@ -16,7 +16,8 @@ public class FileRoot {
 		
 		String[] locations = { 
 			"/home/adc/eclipse-angular/SpringBootNuskinDatabase/TextFiles/",
-			"/home/adc/nuskin-order-manager/"	
+		    "/home/adc/nuskin-order-manager/",
+			"./TextFiles/",
 		};
 		
 		for (String s: locations) {
@@ -28,7 +29,7 @@ public class FileRoot {
 			}
 		}
 
-		return "/";
+		return "./";
 		
 	}
 	
