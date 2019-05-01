@@ -25,7 +25,7 @@ public class Application implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 		
 		boolean populateDatabase = false;
-		boolean backupDatabase = true;
+		boolean backupDatabase = false;
 	
 		if (args.length > 0) {
 			backupDatabase = false;
@@ -33,6 +33,11 @@ public class Application implements CommandLineRunner {
 		if (backupDatabase) {
 			// Might make sense to backup every time we start as well as the scheduled backup every day at midnight
 			db.backup();
+		}
+		
+		
+		if (db.findProductType("02010721") == null) {
+			populateDatabase = true;
 		}
 		
 		if (populateDatabase) {
