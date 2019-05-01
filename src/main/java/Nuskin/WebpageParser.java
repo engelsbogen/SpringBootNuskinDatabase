@@ -1,8 +1,10 @@
 package Nuskin;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
@@ -112,10 +114,11 @@ public class WebpageParser {
 	    
         try {
 	    	
-	    	reader = new BufferedReader(new FileReader(filename));
-	    	
+	    	//reader = new BufferedReader(new FileReader(filename));
+	    	reader = new BufferedReader( new InputStreamReader(new FileInputStream(filename), "UTF-8"));
+
 	    	ProductType product;
-	    	
+
             do {
             	product = findProduct(reader);
             	

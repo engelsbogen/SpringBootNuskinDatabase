@@ -61,7 +61,10 @@ public class ColourCosmeticsParser extends WebpageParser {
 		
 		ArrayList<ProductType> cosmeticList = mapA.get(genericName);
 		
-		if (cosmeticList == null) throw new RuntimeException();
+		if (cosmeticList == null) {
+			System.err.println(genericName + " not mapped");
+			throw new RuntimeException();
+		}
 		
 		return cosmeticList;
 		
