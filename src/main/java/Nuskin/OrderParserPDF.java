@@ -131,18 +131,20 @@ public class OrderParserPDF extends OrderParser {
 	// Eg the order items appears in a table format, where each item is one row in a table. In the clipboard, one row is one line of text  
 	// However in the PDF text, if the description spans multiple lines (in its table cell) then the text splits at that point.
 	// So we have to reconstruct the entire table row
-	public void parse(String filename) {
+	public Order parse(String filename) {
 		
 		File file = new File(filename);
 		FileInputStream stream;
 		try {
 			stream = new FileInputStream(file);
-			parse(stream);
+			return parse(stream);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return null;
 	}
+	
 	
 	
 	public Order parse(InputStream stream) {

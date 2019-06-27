@@ -2,6 +2,7 @@ package Nuskin;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -83,7 +85,7 @@ public class OrderController {
 
             existing.deleteFromDatabase();
 			
-        	return ResponseEntity.ok().build();
+        	return ResponseEntity.ok().body("[]");
     	}
     	else {
     		return ResponseEntity.badRequest().build();
@@ -96,6 +98,14 @@ public class OrderController {
 		String filename = orderNumber + ".pdf";
 		Path path = Paths.get(FileRoot.getRoot() + "Orders/" + filename);
 		File file = path.toFile();
+		
+		if (!file.exists() ) {
+			// No PDF, try .TXT instead
+			filename = orderNumber + ".txt";
+			path = Paths.get(FileRoot.getRoot() + "Orders/" + filename);
+			file = path.toFile();
+		}
+		
 
 		HttpHeaders headers = new HttpHeaders();
 	    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + filename);
@@ -118,24 +128,6 @@ public class OrderController {
 		}
 	}
 	
-//	// POST 
-//    @PostMapping("/orderfileuploadmulti")
-//    public ArrayList<Product> orderFilesUploadMultiple(@RequestParam("file") MultipartFile[] files) {
-//
-//      	ArrayList<Product> unknownProductTypes = new ArrayList<Product>();
-//      	
-//        for (MultipartFile file : files) {
-//    		
-//        	
-//        	unknownProductTypes.addAll(orderFileUpload(file));
-//    		
-//    	}
-//    	
-//        return unknownProductTypes;
-//    
-//    }
-//    
-
     
     public static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor)
     {
@@ -151,6 +143,58 @@ public class OrderController {
         return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
     
+    
+    @PostMapping("/ordertextupload") 
+    public OrderUploadResponse orderTextUpload(@RequestBody String text) {
+    	
+    	
+    	ArrayList<Product> unknownProductTypes = new ArrayList<Product>();
+    	
+    	System.out.println("Parsing order text");
+    	
+	    Order order = new OrderParser().parseString(text);
+	    	    
+    	if (order != null) {
+
+    		if (!order.hasAllInfo())
+    		{
+    		    // Something went wrong with the parsing.
+    			throw new ResponseStatusException(
+  					  HttpStatus.UNPROCESSABLE_ENTITY, "Order text is corrupt or incomplete" 
+  					);
+
+    		}
+    		else {
+        		unknownProductTypes = order.getUnknownProductTypes();
+
+        		// TODO make a PDF file from the text 
+        		
+				Path path = Paths.get(FileRoot.getRoot() + "/Orders/" + order.getOrderNumber() + ".txt");
+				
+				byte[] b = text.getBytes();
+				try {
+					Files.write(path, b);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+        		
+    		}
+    	}
+    	
+    	OrderUploadResponse resp = new OrderUploadResponse();
+    	
+    	resp.message = "Order uploaded";
+    	resp.unknownItems = 	 unknownProductTypes.stream()
+    	                   .filter( distinctProductByKey(p -> p.getSku()) )
+    			           .collect(Collectors.toList());
+
+    	
+    	return resp;
+    	
+
+    }
     
 	// POST 
     @PostMapping("/orderfileupload")
@@ -180,7 +224,25 @@ public class OrderController {
 			}
     		
     	}
-
+    	else if (file.getContentType().equals("text/plain"))
+    	{
+    		
+		    try {
+				order = new OrderParser().parse(file.getInputStream());
+				File dest = new File(FileRoot.getRoot() + "/Orders/" + order.getOrderNumber() + ".txt");
+				
+				file.transferTo(dest);
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+    	}
+    	else {
+    		System.out.println(file.getContentType());
+    	}
+    	
     	if (order != null) {
 
     		if (!order.hasAllInfo())
@@ -198,19 +260,11 @@ public class OrderController {
     	}
     	
     	//https://www.nuskin.com/content/nuskin/en_CA/cpm/order-details.html
-    		
-	    //} catch (IOException ioe) {
-	    //    //if something went wrong, we need to inform client about it
-	    //    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-	    //}
-
-        //return ResponseEntity.ok().build();
-
-    	// Remove duplicates from unknown items
     	
     	OrderUploadResponse resp = new OrderUploadResponse();
     	
     	resp.message = "Order uploaded";
+    	// Remove duplicates from unknown items
     	resp.unknownItems = 	 unknownProductTypes.stream()
     	                   .filter( distinctProductByKey(p -> p.getSku()) )
     			           .collect(Collectors.toList());
