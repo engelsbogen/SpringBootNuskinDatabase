@@ -282,10 +282,11 @@ public class OrderParser {
 	    
         try {
 	    	
-	    	String line = reader.readLine().trim();
+	    	String line = reader.readLine();
 	    	
 	    	while(line != null) {
 
+	    		line = line.trim();
 	    		// Ctrl-A/Ctrl-C on Chrome first line is "Name:" and <name> is on the next line
 	    		// On Firefox, we get "    Name:<name>" on the second line
 	    		// So if we see a line just "Name:" then assume its from Chrome, else Firefox
@@ -297,7 +298,7 @@ public class OrderParser {
 	    			break;
 	    		}
 	    		
-	    		line = reader.readLine().trim();
+	    		line = reader.readLine();
 	    	}
 	    	
 	    	reader.close();
