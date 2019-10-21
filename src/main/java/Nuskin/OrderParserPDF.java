@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.math.BigDecimal;
+import java.time.YearMonth;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -168,6 +169,7 @@ public class OrderParserPDF extends OrderParser {
 	    		
 	    		if (line.startsWith("Order Date")) {
 	    			order.date = line.substring(line.indexOf(':') + 2);
+                    order.date = Util.checkDateFormat(order.date);
 	    		}
 	    		else if (line.startsWith("ID:")) {
 	    			// ID is on the next line

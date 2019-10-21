@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.math.BigDecimal;
+import java.time.YearMonth;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -148,10 +149,10 @@ public class OrderParser {
 	    	   	 	if (m.lookingAt()) {
 	    	   	 		order.orderNumber = m.group(1);
 	    	   	 		order.date = m.group(2);
+	                    order.date = Util.checkDateFormat(order.date);
 	    	   	 	}
-
 	    			//order.orderNumber = line.substring(line.indexOf(':') + 2, 10);
-	    			
+    			
 	    		}
 	    		
 	    		else if (line.startsWith("ID:")) {
@@ -222,6 +223,7 @@ public class OrderParser {
 	    		if (line.startsWith("Order Date")) {
 	    			// Date is on the next line
 	    			order.date = reader.readLine().trim();
+         			order.date = Util.checkDateFormat(order.date);
 	    		}
 	    		else if (line.startsWith("ID:")) {
 	    			order.account = line.substring(3);
