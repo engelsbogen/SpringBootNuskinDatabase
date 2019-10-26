@@ -88,7 +88,50 @@ public class OrderParser {
     	return p;
     	
     }
-	
+
+    
+    ProductAndQuantity parseProductNew(BufferedReader reader, String SKU, String lastLine) {
+        
+        ProductAndQuantity p =  new ProductAndQuantity();
+    
+        if (startsWithAnSKU(SKU)) {
+             
+          try {
+             String description = lastLine;
+             
+             // PSV: 
+             String line = reader.readLine().trim(); 
+             BigDecimal PSV = new BigDecimal(line.substring(5));
+             
+             
+             int quantity = Integer.parseInt(reader.readLine());
+             
+         
+             String unitPriceOrPoints = reader.readLine().trim();
+             PriceOrPoints pp = parsePriceOrPoints(unitPriceOrPoints);
+             
+             //String totalPriceOrPoints = parts[5];
+             
+             // The POINTS value is the total so have to divide by the the quantity to get the points per item
+             pp.points = pp.points.divide(new BigDecimal(quantity));
+             
+             // Tax is 15%
+             // Shipping should divide equally among all products
+             
+             p.product = new Product(SKU, description, pp.price, pp.points, PSV);
+             p.quantity = quantity;
+            }
+            catch(IOException e)
+            {
+                
+            }
+         }
+         
+        return p;
+        
+    }
+
+    
 	BigDecimal parseDollars(String s) {
 		// Remove commas if the order is > $1000!
 		String ss = s.substring(s.indexOf('$')+1);
@@ -128,6 +171,19 @@ public class OrderParser {
     	return null;
     }
    
+
+    boolean isAccount(String s)
+    {
+        if (s.startsWith("CA") || s.startsWith("US") || s.startsWith("UK")) {
+            
+            if (s.length() == 8 || s.length() == 10)  {
+                return true;
+            }
+            
+        }
+        
+        return false;
+    }
     
     public Order parseChrome(BufferedReader reader)
     {
@@ -274,6 +330,84 @@ public class OrderParser {
     	
     }
     
+    
+    public Order parseNewFormat(BufferedReader reader, String account)
+    {
+        Order order = new Order();
+
+        order.account = account;
+        try {
+            
+            String lastLine = ""; 
+            String line = reader.readLine();
+            
+            while(line != null) {
+
+                line = line.trim();
+        
+                if (line.startsWith("Order #:")) {
+                    order.orderNumber = line.substring(9);
+                }
+                else if (line.startsWith("Date:")) {
+                    order.date = line.substring(6);
+                    order.date = Util.checkDateFormat(order.date);
+                }
+                else if (line.startsWith("Shipped to:")) {
+                    // next line is name, then 2 lines after (always?) are the shipping address
+                    order.shippingAddress = reader.readLine();
+                    order.shippingAddress += " ";
+                    order.shippingAddress += reader.readLine().trim();
+                    order.shippingAddress += ", ";
+                    order.shippingAddress += reader.readLine().trim();
+                }
+                //Subtotal:  $358.25
+                else if (line.startsWith("Subtotal")) {
+                    order.subtotal = parseDollars(line);
+                }
+                //Shipping:  $0.00
+                else if (line.startsWith("Shipping") && line.contains("$")) {
+                    order.shipping = parseDollars(line);
+                }
+                //Tax:   $81.25
+                else if (line.startsWith("Tax")) {
+                    order.tax = parseDollars(line);
+                    
+                    // Orders through a distributor account attract tax on the retail price,
+                    // and also tax is applied to products purchased with points. 
+                    // As the order does not itemise the tax we need to know what the wholesale price of each 
+                    // product is to know how to split up the cost
+                    
+                }
+                //Total:     $439.50             
+                else if (line.startsWith("Total")) {
+                    if (order.getTotal().compareTo(parseDollars(line)) != 0) {
+                        throw new RuntimeException();
+                    }
+                }
+                else {
+                    
+                    // Products are now
+                    //  Description
+                    //  SKU
+                    //  PSV: 
+                    //  Quantity
+                    //  Unit price
+                    //  Total price
+                    // So can't identify the start by looking for an SKU anymore.
+                    // Keep the last line then once we find an SKU, use it.
+                    ProductAndQuantity p = parseProductNew(reader, line, lastLine);
+                    if (p.quantity > 0) order.addProduct(p.product, p.quantity);
+                }
+                lastLine = line;
+                line = reader.readLine();
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return order;
+    }
         
 	public Order parse(BufferedReader reader)
 	{
@@ -298,6 +432,10 @@ public class OrderParser {
 	    			else
 	    				order = parseFirefox(reader);
 	    			break;
+	    		}
+	    		else if (isAccount(line)) {
+	    		    order = parseNewFormat(reader, line);
+	    		    break;
 	    		}
 	    		
 	    		line = reader.readLine();
