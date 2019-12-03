@@ -103,18 +103,43 @@ public class OrderParser {
              String line = reader.readLine().trim(); 
              BigDecimal PSV = new BigDecimal(line.substring(5));
              
+             // Now they've added price here
+             line = reader.readLine();
              
-             int quantity = Integer.parseInt(reader.readLine());
-             
+             int quantity;
+             @SuppressWarnings("unused")
+             BigDecimal price;
+             PriceOrPoints pp;
+             try {
+                 // Another change - they've started to put the unit price before the quantity
+                 // In that case, parsing it as an int will throw an exception, which we catch 
+                 // and continue below
+                 quantity = Integer.parseInt(line);
+                 // Ok, that succeeded, continue with the old type processing
+                 String unitPriceOrPoints = reader.readLine().trim();
+                 pp = parsePriceOrPoints(unitPriceOrPoints);
+                 
+                 //String totalPriceOrPoints = parts[5];
+                 
+                 // The POINTS value is the total so have to divide by the the quantity to get the points per item
+                 pp.points = pp.points.divide(new BigDecimal(quantity));
+             }
+             catch(NumberFormatException e) {
+                 
+                 // So it wasn't an integer, parse it as a $ price
+                 price = parseDollars(line);
+                 line = reader.readLine();
+                 quantity = Integer.parseInt(line);
+                 String unitPriceOrPoints = reader.readLine().trim();
+                 pp = parsePriceOrPoints(unitPriceOrPoints);
+                 
+                 // The POINTS value is the total so have to divide by the the quantity to get the points per item
+                 pp.points = pp.points.divide(new BigDecimal(quantity));
+                 // Also in this format the price is the total price 
+                 pp.price = pp.price.divide(new BigDecimal(quantity));
+             }
+            
          
-             String unitPriceOrPoints = reader.readLine().trim();
-             PriceOrPoints pp = parsePriceOrPoints(unitPriceOrPoints);
-             
-             //String totalPriceOrPoints = parts[5];
-             
-             // The POINTS value is the total so have to divide by the the quantity to get the points per item
-             pp.points = pp.points.divide(new BigDecimal(quantity));
-             
              // Tax is 15%
              // Shipping should divide equally among all products
              
@@ -176,8 +201,17 @@ public class OrderParser {
     {
         if (s.startsWith("CA") || s.startsWith("US") || s.startsWith("UK")) {
             
-            if (s.length() == 8 || s.length() == 10)  {
-                return true;
+            // Then expect some numbers
+            if (s.length() >= 8 && s.length() <= 10)  {
+                
+                try {
+                    int ac = Integer.parseInt(s.substring(2));
+                    if (ac > 0) return true;
+                }
+                catch (NumberFormatException e) {
+                    
+                }
+                
             }
             
         }
@@ -379,7 +413,7 @@ public class OrderParser {
                     
                 }
                 //Total:     $439.50             
-                else if (line.startsWith("Total")) {
+                else if (line.startsWith("Total:")) {
                     if (order.getTotal().compareTo(parseDollars(line)) != 0) {
                         throw new RuntimeException();
                     }
