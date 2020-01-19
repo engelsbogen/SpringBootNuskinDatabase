@@ -1,5 +1,13 @@
 package Nuskin;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.List;
+
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -16,13 +24,6 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.List;
 
 public class GoogleDrive {
 	
@@ -46,6 +47,10 @@ public class GoogleDrive {
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         // Load client secrets.
         InputStream in = GoogleDrive.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+        if (in == null) {
+            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
+        }
+
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
         // Build flow and trigger user authorization request.
@@ -58,7 +63,7 @@ public class GoogleDrive {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
-    public static void upload(String filename) throws IOException, GeneralSecurityException {
+    public static boolean upload(String filename) throws IOException, GeneralSecurityException {
     	
         // Build a new authorized API client service.
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
@@ -68,16 +73,24 @@ public class GoogleDrive {
                 .build();
 
         // Find ID of backup folder. Query files that are folders and named Backups
-        FileList result = service.files().list()
+        FileList result = null;
+        try {
+        
+         result = service.files().list()
                                  .setQ("mimeType='application/vnd.google-apps.folder' and name='Backups'")
 			                     .setFields("nextPageToken, files(id, name)")
 			                     .execute();
+        }
+        catch (IOException ioe) {
+            System.out.println("Google Drive list files exception: " + ioe.getMessage());
+            return false;
+        }
         
         List<File> files = result.getFiles();
         
         if (files == null || files.isEmpty()) {
             System.out.println("Backup folder not found");
-            return;
+            return false;
         } 
         else {
 
@@ -92,14 +105,17 @@ public class GoogleDrive {
             FileContent mediaContent = new FileContent("text/plain", f);
             
 	        try {
+	            System.out.println("Copying to Google drive");
 		        service.files().create(fileMetadata, mediaContent)
 		               .setFields("id, parents")
 		               .execute();
 	        }
 	        catch (GoogleJsonResponseException e) {
-	        	System.out.println(e.toString());
+	        	System.out.println(e.getStatusMessage() + " : " + e.getMessage() );
+	        	return false;
 	        }
         }
+        return true;
     }
     
     

@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -167,13 +168,20 @@ public class ProductDatabase {
 		
 		String secondaryBackupPath = FileRoot.getSecondaryPath() + "Backups";
 		
-		String[] years = { "2018", "2019" };
-		
 		boolean status = true;
 		
-		for (String year : years ) {
+		// Only backup the current year, and previous year if before end of April (tax return date)
+		LocalDate today = LocalDate.now();
+		int firstYear = today.getYear();
+		int lastYear = firstYear;
 		
-		  status &= doBackup(user,password,database + year, backupPath, secondaryBackupPath);
+		if (today.getMonthValue() < 5) {
+		    firstYear = lastYear - 1;
+		}
+		
+		for (int year = firstYear; year <= lastYear; year++ ) {
+		
+		  status &= doBackup(user,password,database + Integer.toString(year), backupPath, secondaryBackupPath);
 		}
 		
 		return status;
@@ -289,19 +297,23 @@ public class ProductDatabase {
 
                 // (2) The cloud
                 // Don't do this in dev environment
-                GoogleDrive.upload(backupFilename);
-                log.info("Google Drive Backup created successfully for " + database );
+                status = GoogleDrive.upload(backupFilename);
+                if (status)
+                    log.info("Google Drive Backup created successfully for " + database );
+                else
+                    log.info("Google Drive Backup failed for " + database );
                                 
             } else {
                 status = false;
                 log.info("Could not create the backup for " + database );
             }
-            
  
         } catch (IOException ioe) {
             log.error("IOException: %s", ioe.toString());
+            status = false;
         } catch (Exception e) {
             log.error("Exception: %s", e.toString());
+            status = false;
         }
         return status;
 	}
