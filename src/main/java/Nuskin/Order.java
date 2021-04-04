@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name="orders")
-class Order {
+public class Order {
 
 	@Transient
 	private Logger  log =  LoggerFactory.getLogger(Order.class);
@@ -752,9 +752,11 @@ class Order {
 	void addToDatabase() {
 		ProductDatabase db = ProductDatabase.getDB();
 		
-		
-		// Is this order already in the database?
-		
+		// If being used outside of Spring the database is not set up
+	    if (db == null)
+	    	return;
+
+	    // Is this order already in the database?
 		Order existing = db.getOrder(this.orderNumber);
 		if (existing == null) {
 			db.addOrder(this);

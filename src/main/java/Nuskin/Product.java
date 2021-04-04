@@ -38,7 +38,7 @@ public class Product  {
 	@Column
 	EndUse endUse = EndUse.INSTOCK;
 	@OneToOne // The primary key of productType (the SKU) will be added to this table
-	ProductType productType = new ProductType();
+	ProductType productType = null; //new ProductType(); 
 	@OneToOne
 	Order order;
 
