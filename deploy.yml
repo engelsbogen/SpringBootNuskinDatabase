@@ -41,7 +41,7 @@
 
     - name: copy backend jar file
       when: doCopy
-      copy: src=target/nuskin-order-manager-{{version}}.jar dest={{destRoot}}/nuskin-order-manager-{{version}}.jar mode='u+rwx'
+      copy: src=target/nuskin-order-manager-{{version}}.jar dest={{destRoot}}/nuskin-order-manager-{{version}}-exec.jar mode='u+rwx'
 
     - name: copy front end code
       when: doCopy
@@ -57,7 +57,7 @@
 
     - name: link to the newly deployed app
       when: doCopy
-      file: path={{destRoot}}/nuskin-order-manager.jar src={{destRoot}}/nuskin-order-manager-{{version}}.jar state=link
+      file: path={{destRoot}}/nuskin-order-manager.jar src={{destRoot}}/nuskin-order-manager-{{version}}-exec.jar state=link
 
     # For some reason that I haven't yet established, on the Q190 I cannot run the jar file direct, but it works with java -jar <jarfile>
 #    - name: start running app

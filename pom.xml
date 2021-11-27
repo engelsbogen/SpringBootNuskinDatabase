@@ -4,6 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.engelsbogen</groupId>
+    <artifactId>nuskin-order-manager</artifactId>
     <version>0.1.0</version>
 
     <parent>
@@ -16,68 +17,68 @@
     <dependencies>
         
     <dependency>
-    	<groupId>org.springframework.boot</groupId>
-    	<artifactId>spring-boot-starter-data-jpa</artifactId>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
     <dependency>
-    	<groupId>mysql</groupId>
-    	<artifactId>mysql-connector-java</artifactId>
-    	<scope>runtime</scope>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <scope>runtime</scope>
     </dependency>
-	<dependency>
-	    <groupId>org.apache.derby</groupId>
-	    <artifactId>derby</artifactId>
-	</dependency>    
+    <dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derby</artifactId>
+    </dependency>    
     
     <dependency>
-    	<groupId>org.springframework.boot</groupId>
-    	<artifactId>spring-boot-starter-web</artifactId>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
     
     <dependency>
-    	<groupId>org.springframework.boot</groupId>
-    	<artifactId>spring-boot-starter-thymeleaf</artifactId>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-thymeleaf</artifactId>
     </dependency>
     <dependency>
-    	<groupId>org.apache.pdfbox</groupId>
-    	<artifactId>pdfbox</artifactId>
-    	<version>[2.0.15,)</version>
-    	<type>jar</type>
+        <groupId>org.apache.pdfbox</groupId>
+        <artifactId>pdfbox</artifactId>
+        <version>[2.0.15,)</version>
+        <type>jar</type>
     </dependency>
 
     <dependency>
-    	<groupId>javax.xml.bind</groupId>
-    	<artifactId>jaxb-api</artifactId>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
     </dependency>
     <dependency>
-    	<groupId>com.googlecode.json-simple</groupId>
-    	<artifactId>json-simple</artifactId>
-    	<version>1.1.1</version>
+        <groupId>com.googlecode.json-simple</groupId>
+        <artifactId>json-simple</artifactId>
+        <version>1.1.1</version>
     </dependency>
     <dependency>
-    	<groupId>com.google.api-client</groupId>
-    	<artifactId>google-api-client</artifactId>
-    	<version>1.26.0</version>
+        <groupId>com.google.api-client</groupId>
+        <artifactId>google-api-client</artifactId>
+        <version>1.26.0</version>
     </dependency>
     <dependency>
-    	<groupId>com.google.oauth-client</groupId>
-    	<artifactId>google-oauth-client</artifactId>
-    	<version>1.27.0</version>
+        <groupId>com.google.oauth-client</groupId>
+        <artifactId>google-oauth-client</artifactId>
+        <version>1.27.0</version>
     </dependency>
     <dependency>
-    	<groupId>com.google.apis</groupId>
-    	<artifactId>google-api-services-drive</artifactId>
-    	<version>v3-rev136-1.25.0</version>
+        <groupId>com.google.apis</groupId>
+        <artifactId>google-api-services-drive</artifactId>
+        <version>v3-rev136-1.25.0</version>
     </dependency>
     <dependency>
-    	<groupId>com.google.oauth-client</groupId>
-    	<artifactId>google-oauth-client-jetty</artifactId>
-    	<version>1.27.0</version>
+        <groupId>com.google.oauth-client</groupId>
+        <artifactId>google-oauth-client-jetty</artifactId>
+        <version>1.27.0</version>
     </dependency>
     <dependency>
-    	<groupId>org.springframework.boot</groupId>
-    	<artifactId>spring-boot-configuration-processor</artifactId>
-    	<optional>true</optional>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-configuration-processor</artifactId>
+        <optional>true</optional>
     </dependency>
 
     </dependencies>
@@ -93,9 +94,23 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<executable>true</executable>
-				</configuration>
+                
+                 <!--  This bit creates a separate .jar (just my app) and -exec.jar (with spring boot) -->
+                 <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>exec</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>true</executable>
+                    <attach>true</attach>
+                </configuration>
             </plugin>
 
            <!-- Somehow I need to get Spring to serve the front end files from ./public, ./build 
@@ -103,20 +118,20 @@
                 Here I force the MANIFEST file to have a Class-Path entry (otherwise its not set, but somehow
                 the jars are all automatically added anyway)
                 -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifestEntries>
-							<Class-Path>./</Class-Path>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
-		            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Class-Path>./</Class-Path>
+                             <Automatic-Module-Name>org.engelsbogen.nuskin.order.manager</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+                    
         </plugins>
     </build>
 
-    <artifactId>nuskin-order-manager</artifactId>
 </project>
